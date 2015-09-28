@@ -1,17 +1,18 @@
 install.packages("maps")
 install.packages("dplyr")
+install.packages("ggplot2")
 
 library(ggplot2)
 library(maps)
 library(dplyr)
 library(plyr)
 
-data.neic <- read.table("../../2014_NEIC_declustered.c4.csv", header = TRUE, sep = ",")
+data.neic <- read.table("data/2014_NEIC_declustered.c4.csv", header = TRUE, sep = ",")
 
-data.anss <- read.table("../../anss.csv", header = TRUE, sep = ",")
+data.anss <- read.table("data/anss.csv", header = TRUE, sep = ",")
 colnames(data.anss) <- c("datetime","lat","lon","dp.km","mag","magtype","nbstations", "gap", "distance", "rms", "source", "eventid")
 
-stations.iris <- read.table("../../out_fetchmdata_sept15", header = FALSE, sep = "|")
+stations.iris <- read.table("data/out_fetchmdata_sept15", header = FALSE, sep = "|")
 colnames(stations.iris) <- c("net","sta","loc","chan","lat","lon","elev","depth","azimuth","dip","instrument","scale","scalefreq","scaleunits","samplerate","start","end")
 
 
@@ -66,6 +67,5 @@ p <- ggplot() +
   annotate("rect", xmin=-84, xmax=-71, ymin=35.5, ymax=43.5, colour="black", size=1, fill="blue", alpha="0.01") +
   geom_point(size=1, alpha = .7, aes(dataset$lon, dataset$lat, color=dataset$emw)) +
   scale_color_gradient(low="blue", high="red") +
-  theme(plot.background = element_rect(fill = 'grey'))
-
-p + geom_abline(intercept = 3, slope = -.45, color = "blue", size = 1)
+  theme(plot.background = element_rect(fill = 'grey')) +
+  geom_abline(intercept = 3, slope = -.45, color = "blue", size = 1)
