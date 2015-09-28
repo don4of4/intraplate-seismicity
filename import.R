@@ -47,9 +47,9 @@ moveme <- function (invec, movecommand) {
 
 
 
-data.neic <- read.table("data/2014_NEIC_declustered.c4.csv", header = TRUE, sep = ",")
+data.neic <- read.table("data/NEIC_HM_2014.csv", header = TRUE, sep = ",")
 
-data.anss <- read.table("data/anss.csv", header = TRUE, sep = ",")
+data.anss <- read.table("data/ANSS_2013.csv", header = TRUE, sep = ",")
 colnames(data.anss) <- c("datetime","lat","lon","dp.km","mag","magtype","nbstations", "gap", "distance", "rms", "source", "eventid")
 
 stations.iris <- read.table("data/out_fetchmdata_sept15", header = FALSE, sep = "|")
