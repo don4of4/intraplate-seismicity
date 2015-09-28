@@ -35,13 +35,18 @@ data.anss$emw <- ifelse(data.anss$magtype == "ML", 0.806*data.anss$mag + 0.633,
 data.anss <- subset(data.anss, data.anss$emw > 0)
 
 # Date formatting
+options(digits.secs=3)
 data.neic$datetime <- ISOdatetime(data.neic$y, data.neic$m, data.neic$d, data.neic$h, data.neic$m.1, data.neic$s, tz = "")
 data.anss$datetime <- as.POSIXct(data.anss$datetime, tz = "")
 stations.iris$start <- strptime(stations.iris$start,format="%Y-%m-%dT%H:%M:%OS")
 stations.iris$end <- strptime(stations.iris$end,format="%Y-%m-%dT%H:%M:%OS")
+
 #add miliseconds to format
-stations.iris$start <- options(digits.secs=3)
-stations.iris$end  <- options(digits.secs=3)
+
+#op <- options(digits.secs=3)
+#options(op)
+#stations.iris$start <- options(digits.secs=3)
+#stations.iris$end  <- options(digits.secs=3)
 #options(stations.iris$start) #reset options
 #options(stations.iris$end) #reset options
 
