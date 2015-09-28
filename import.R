@@ -33,8 +33,8 @@ data.neic$datetime <- ISOdatetime(data.neic$y, data.neic$m, data.neic$d, data.ne
 stations.iris$start <- strptime(stations.iris$start,format="%Y-%m-%dT%H:%M:%OS")
 stations.iris$end <- strptime(stations.iris$end,format="%Y-%m-%dT%H:%M:%OS")
 #add miliseconds to format
-#stations.iris$start <- options(digits.secs=3)
-#stations.iris$end  <- options(digits.secs=3)
+stations.iris$start <- options(digits.secs=3)
+stations.iris$end  <- options(digits.secs=3)
 #options(stations.iris$start) #reset options
 #options(stations.iris$end) #reset options
 
