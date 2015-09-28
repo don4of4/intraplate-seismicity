@@ -11,10 +11,45 @@ library(plyr)
 library(fpc)
 library(fossil)
 
+# Utility function:  DO NOT EDIT
+moveme <- function (invec, movecommand) {
+  movecommand <- lapply(strsplit(strsplit(movecommand, ";")[[1]], 
+                                 ",|\\s+"), function(x) x[x != ""])
+  movelist <- lapply(movecommand, function(x) {
+    Where <- x[which(x %in% c("before", "after", "first", 
+                              "last")):length(x)]
+    ToMove <- setdiff(x, Where)
+    list(ToMove, Where)
+  })
+  myVec <- invec
+  for (i in seq_along(movelist)) {
+    temp <- setdiff(myVec, movelist[[i]][[1]])
+    A <- movelist[[i]][[2]][1]
+    if (A %in% c("before", "after")) {
+      ba <- movelist[[i]][[2]][2]
+      if (A == "before") {
+        after <- match(ba, temp) - 1
+      }
+      else if (A == "after") {
+        after <- match(ba, temp)
+      }
+    }
+    else if (A == "first") {
+      after <- 0
+    }
+    else if (A == "last") {
+      after <- length(myVec)
+    }
+    myVec <- append(temp, values = movelist[[i]][[1]], after = after)
+  }
+  myVec
+}
 
-data.neic <- read.table("data/2014_NEIC_declustered.c4.csv", header = TRUE, sep = ",")
 
-data.anss <- read.table("data/anss.csv", header = TRUE, sep = ",")
+
+data.neic <- read.table("data/NEIC_HM_2014.csv", header = TRUE, sep = ",")
+
+data.anss <- read.table("data/ANSS_2013.csv", header = TRUE, sep = ",")
 colnames(data.anss) <- c("datetime","lat","lon","dp.km","mag","magtype","nbstations", "gap", "distance", "rms", "source", "eventid")
 
 stations.iris <- read.table("data/out_fetchmdata_sept15", header = FALSE, sep = "|")
@@ -61,11 +96,10 @@ m <- dplyr::bind_rows(data.neic, data.anss)
 
 dataset <- subset(m, lat >= 35.5 & lat <= 43.5 & lon <= -71 & lon >= -84 )
 
-# TODO Calculate distance matrix for the purposes of clustering.
-# Note:  Must cast the lon/lat to the appropriate datatypes or this will
-#        not work.
-#dist<- earth.dist(dataset, dist=T) 
-#dens<-dbscan(dist,MinPts=25,eps=0.43,method="dist")
+# Calculate distance matrix for the purposes of clustering.
+coordinates  <- data.frame(long=dataset$lon, lat=dataset$lat)
+dist  <- earth.dist(df, dist=T)
+dens<-dbscan(dist,MinPts=25,eps=0.43,method="dist")
 
 
 target_states <- c( "pennsylvania", "new york", "new jersey", "virginia", "kentucky","rhode island",
