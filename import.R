@@ -55,6 +55,8 @@ colnames(data.anss) <- c("datetime","lat","lon","dp.km","mag","magtype","nbstati
 stations.iris <- read.table("data/out_fetchmdata_sept15", header = FALSE, sep = "|")
 colnames(stations.iris) <- c("net","sta","loc","chan","lat","lon","elev","depth","azimuth","dip","instrument","scale","scalefreq","scaleunits","samplerate","start","end")
 
+data.small_mag <- read.table("data/small_mag_ISC_75_2012.csv", header = TRUE, sep = ",")
+colnames(data.small_mag) <- c("EVENTID", "AUTHOR", "DATE","TIME", "LAT","LON", "DEPTH","DEPFIX","AUTHOR2","TYPE","MAG", "Other1", "Other2", "Other3")
 
 # Magnitude to mw
 data.anss$emw <- ifelse(data.anss$magtype == "ML", 0.806*data.anss$mag + 0.633,
@@ -121,3 +123,9 @@ p <- ggplot() +
   geom_abline(intercept = 3, slope = -.45, color = "blue", size = 1)
 
 d <- dbscan(dataset, 10,showplot = 2)
+
+#Configurations for data.small_mag
+
+#Remove duplicates
+#smallmag_df <-data.frame(a,b)
+data.small_mag %>% distinct
