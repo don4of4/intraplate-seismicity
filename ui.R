@@ -31,16 +31,16 @@ shinyUI(pageWithSidebar(
   
   # Show a plot of the generated distribution
   mainPanel(
-    dataset = data.frame(
-      Longitude = c(35.5, 43.5),
-      Magnitude = factor(dataset$emw),
-      Latitude = c(-84,-71)
-    ),
-    
-    plot(dataset$lat, dataset$lon, xlab = "Latitude",
-         ylab = "Longitude", main = "Earthquakes Over Time", type = "n"),
-    ggplot(dataset, aes(x = Latitude, y = Longitude, colour = Magnitude)) +
-         geom_point() + opts(title = "Earthquakes Over Time")
-  )
+    #dataset = data.frame(
+    #  Longitude = c(35.5, 43.5),
+    #  Magnitude = factor(dataset$emw),
+    #  Latitude = c(-84,-71)
+    #),
+    width = 13
+    #ggplot(dataset, aes(x = Latitude, y = Longitude, colour = Magnitude)) +
+    #     geom_point() + opts(title = "Earthquakes Over Time")
+  ),
+  plot(dataset$lat,dataset$lon, xlab = "Latitude",
+       ylab = "Longitude", main = "Earthquakes Over Time")
   
 ))
