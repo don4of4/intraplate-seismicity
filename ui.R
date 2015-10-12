@@ -16,7 +16,6 @@
 library(shiny)
 
 shinyUI(pageWithSidebar(
-  
   # Application title
   headerPanel("EES27 - Graphs Through Time"),
   
@@ -36,11 +35,7 @@ shinyUI(pageWithSidebar(
     #  Magnitude = factor(dataset$emw),
     #  Latitude = c(-84,-71)
     #),
-    width = 13
-    #ggplot(dataset, aes(x = Latitude, y = Longitude, colour = Magnitude)) +
-    #     geom_point() + opts(title = "Earthquakes Over Time")
-  ),
-  plot(dataset$lat,dataset$lon, xlab = "Latitude",
-       ylab = "Longitude", main = "Earthquakes Over Time")
-  
+    h3(textOutput("caption")),
+    plotOutput("plot")
+  )
 ))
