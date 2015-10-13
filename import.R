@@ -66,7 +66,7 @@ data.small_mag$declustered <- FALSE
 # Filter out based on lat and long
   m <- rbind.fill(data.neic, data.anss)
   m <- dplyr::bind_rows(data.neic, data.anss)
-  dataset <- subset(m, lat >= 35.5 & lat <= 43.5 & lon <= -71 & lon >= -84 )
+  dataset <- subset(m, lat >= 35.5 & lat <= 43.5 & lon <= -71 & lon >= -84)
 
 # Calculate distance matrix for the purposes of clustering.
 coordinates  <- data.frame(long=dataset$lon, lat=dataset$lat)
