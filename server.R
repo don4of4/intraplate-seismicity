@@ -12,7 +12,7 @@ library(ggplot2)
 shinyServer(function(input, output) {
   # Create a reactive text
   text <- reactive({
-    paste(input$bins, '-')
+    paste(input$bins[1], '-',input$bins[2])
   }) 
   
   # Return as text the selected variables
@@ -23,8 +23,10 @@ shinyServer(function(input, output) {
   
   # Generate a plot of the requested variables
   output$plot <- renderPlot({
-    #modifiedplot <- p + ggplot()
-    myplot <- p
+    
+    myplot <- dataset[ which(substr(dataset$datetime,1,4) >= input$bins[1] 
+                       & substr(dataset$datetime,1,4) <= input$bins[2]), ]
+    myplot <- subset(p,myplot)
     print(myplot)
   })
 })
