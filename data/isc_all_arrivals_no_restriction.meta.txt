@@ -1,0 +1,23 @@
+International Seismological Centre
+Arrivals
+
+Please consider the ISC mirror server hosted at IRIS DMC as it may be faster.
+
+Any use of data from the ISC Bulletin should be cited. The correct format for citations may be found on our citation page.
+
+Arrival search summary:
+Database: ISC Bulletin
+Station search: Global search
+Event search type: Rectangular search
+Latitude range: 35.5 to 43.5
+Longitude range: -84 to -71
+Start date: 1904-01-01 00:00:00
+End date: 2015-10-15 00:00:00
+Please note:
+Before 1 Jan 2006 the Jeffreys-Bullen (JB) travel times were used to compute the ISC hypocentres. From 1 Jan 2006 the ISC hypocentres are computed and reviewed using the ak135 velocity model. In addition, the JB based hypocentres (agency ISCJB) are still computed for the purpose of continuity until such time when the entire ISC dataset has been recomputed using ak135 (by July 2014). The ISCJB solutions are not reviewed by the ISC seismologists.
+
+Data on or after 2013/02/01 have not been reviewed by the ISC.
+
+DATA_TYPE ARRIVAL:ASSOCIATED CSV
+--EVENT--|---------------------------------------------------------ARRIVAL DATA----------------------------------------------------------|---------------ORIGIN DATA (PRIME HYPOCENTRE)------------|---EVENT MAGNITUDE--
+EVENTID  ,REPORTER ,STA  ,LAT     ,LON      ,ELEV   ,CHN,DIST  ,BAZ  ,ISCPHASE,REPPHASE,DATE      ,TIME       ,RES  ,TDEF,AMPLITUDE,PER  ,AUTHOR   ,DATE      ,TIME       ,LAT     ,LON      ,DEPTH,AUTHOR   ,TYPE  ,MAG 
