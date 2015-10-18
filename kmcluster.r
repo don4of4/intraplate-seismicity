@@ -16,7 +16,7 @@ dist2 <- dist(coords2, method = "euclidean", diag = FALSE, upper = FALSE, p = 2)
 #diss <- seqdist(mvad.seq, method="HAM")
 
 ## K-Medoids
-kmclust <- wcKMedoids(dist2, 25, weights=NULL, npass = 1, initialclust=25, method="KMedoids", cluster.only = FALSE, debuglevel=0)
+kmclust <- wcKMedoids(dist2, 25, weights=NULL, npass = 1, initialclust=NULL, method="KMedoids", cluster.only = FALSE, debuglevel=0)
 #clust5 <- wcKMedoids(diss, k=5, weights=aggMvad$aggWeights)
 
 ## clust5$clustering contains index number of each medoids
