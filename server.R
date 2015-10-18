@@ -44,7 +44,6 @@ shinyServer(function(input, output, clientData, session) {
     plotstations <- subset(stations.iris, format(start, "%Y") >= input$bins[1] & 
                              format(start, "%Y") <= input$bins[2] & lat >= 33.5 & 
                              lat <= 45.5 & lon <= -69 & lon >= -85)
-
     pp <- ggplot() +
       geom_polygon(aes(long,lat, group=group), fill="palegreen3", colour="grey60", data=county) +
       geom_polygon( data=states, aes(x=long, y=lat, group = group),colour="royalblue4", fill=NA) +

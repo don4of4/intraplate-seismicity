@@ -14,7 +14,7 @@ library(fossil)
 library(WeightedCluster)
 
 data.neic <- read.table("data/NEIC_HM_2014.csv", header = TRUE, sep = ",")
-colnames(data.neic) <- c("mag","lon","lat","depth","y","m","d", "h", "m.1", "s", "mwsig", "nstar","comment")
+colnames(data.neic) <- c("emw","lon","lat","depth","y","m","d", "h", "m.1", "s", "mwsig", "nstar","comment")
 data.neic$src <- 'HM_2014'
 data.neic$declustered <- TRUE
 
@@ -44,9 +44,7 @@ data.small_mag$declustered <- FALSE
   # FIXME: Hours in this data is invalid; most tuples are > 24.  Why?
 
 # Rename lon and lat
-  data.neic$lon <- data.neic$lon.dE.
-  data.neic$lat <- data.neic$lat.dN.
-  data.neic$lon.dE. <- data.neic$lat.dN. <- data.neic$y <- data.neic$m <- data.neic$d <- data.neic$h <- data.neic$m.1 <- data.neic$s <- NULL
+  data.neic$y <- data.neic$m <- data.neic$d <- data.neic$h <- data.neic$m.1 <- data.neic$s <- NULL
   
 
 # Magnitude to mw
