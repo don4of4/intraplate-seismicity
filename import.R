@@ -14,11 +14,12 @@ library(fossil)
 library(WeightedCluster)
 
 data.neic <- read.table("data/NEIC_HM_2014.csv", header = TRUE, sep = ",")
+colnames(data.neic) <- c("mag","lon","lat","depth","y","m","d", "h", "m.1", "s", "mwsig", "nstar","comment")
 data.neic$src <- 'HM_2014'
 data.neic$declustered <- TRUE
 
 data.anss <- read.table("data/ANSS_2013.csv", header = TRUE, sep = ",")
-colnames(data.anss) <- c("datetime","lat","lon","dp.km","mag","magtype","nbstations", "gap", "distance", "rms", "source", "eventid")
+colnames(data.anss) <- c("datetime","lat","lon","depth","mag","magtype","nbstations", "gap", "distance", "rms", "source", "eventid")
 data.anss$src <- 'ANSS_2013'
 data.anss$declustered <- FALSE
 
