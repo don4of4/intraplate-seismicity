@@ -23,9 +23,14 @@ shinyUI(pageWithSidebar(
   sidebarPanel(
     sliderInput("bins",
                 "Time:",
-                min = 1900,
+                min = 1800,
                 max = 2015,
-                value = c(1900,2015))
+                value = c(1800,2015),
+                sep = "",
+                step=5),
+    actionButton("decrement_end_year", "End-date -5ys"),
+    actionButton("increment_end_year", "End-date +5ys")
+    
   ),
   
   # Show a plot of the generated distribution
@@ -36,6 +41,7 @@ shinyUI(pageWithSidebar(
     #  Latitude = c(-84,-71)
     #),
     h3(textOutput("caption")),
-    plotOutput("plot")
+    plotOutput("plot"),
+    plotOutput("plot2")
   )
 ))

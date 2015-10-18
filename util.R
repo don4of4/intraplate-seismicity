@@ -1,3 +1,28 @@
+# Copied from G-Library
+as_radians = function(theta=0){
+  return(theta * pi / 180)
+}
+
+# For calculations of distance
+# TODO consider depth
+calc_dist = function(from, to) {
+  lat1 = as_radians(from$lat)
+  lon1 = as_radians(from$lon)
+  lat2 = as_radians(to$lat)
+  lon2 = as_radians(to$lon)
+  a = 3963.191;
+  b = 3949.903;
+  numerator = ( a^2 * cos(lat2) )^2 + ( b^2 * sin(lat2) ) ^2
+  denominator = ( a * cos(lat2) )^2 + ( b * sin(lat2) )^2
+  
+  # Ellipticity of the earth
+  radiusofearth = sqrt(numerator/denominator) 
+  
+  d = radiusofearth * acos( sin(lat1) * sin(lat2) + cos(lat1)*cos(lat2)*cos(lon2 - lon1) )
+  d.return = list(distance_miles=d)
+  return(d.return)
+}
+
 # Utility function:  DO NOT EDIT
 moveme <- function (invec, movecommand) {
   movecommand <- lapply(strsplit(strsplit(movecommand, ";")[[1]], 
