@@ -1,3 +1,5 @@
+library(WeightedCluster)
+
 ##K-Mediods Clustering
 #Can use distance matrix above
 
