@@ -13,6 +13,29 @@ library(ggplot2)
 
 shinyServer(function(input, output, clientData, session) {
   
+  #plotdata <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2])
+  
+  #Download handler for CSV download button
+#   output$downloadCSV <- downloadHandler(
+#     filename = function(){
+#       paste('data_', input$bins[1], '-',input$bins[2], '.csv', sep = '')
+#     }, 
+#     content = function(file) {
+#       write.csv(plotdata, file)
+#       }, 
+#     contentType = 'text/csv'
+#     )
+#   
+#   #Download handler for png download button
+#   output$downloadPNG <- downloadHandler(
+#     filename = function(){
+#       paste('data_', input$bins[1], '-',input$bins[2], '.png', sep = '')
+#     }, 
+#     content = function(file) {
+#       write.csv(plotdata, file)
+#     }, 
+#     contentType = 'image/png'
+#   )
   
   # Create a reactive text
   text <- reactive({

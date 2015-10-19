@@ -15,22 +15,40 @@ install.packages("shiny")
 
 library(shiny)
 
-shinyUI(pageWithSidebar(
+shinyUI(
+  fluidPage(
   # Application title
-  headerPanel("EES27 - Graphs Through Time"),
+  titlePanel("East Atlantic Seismic Data Through Time"),
+  
+  h4("EES 293 Research Project by Donald Scott, Dean Kroker and Andrea Stiffelman"),
+  
+  br(),
+  
+  #Panel for slider
+  fluidRow(
+    wellPanel(
+      sliderInput("bins",
+                  "Time:",
+                  min = 1800,
+                  max = 2015,
+                  value = c(1800,2015),
+                  sep = "",
+                  step=5)
+      )
+  ),
   
   # Sidebar with a slider input for number of bins
+  sidebarLayout(
   sidebarPanel(
-    sliderInput("bins",
-                "Time:",
-                min = 1800,
-                max = 2015,
-                value = c(1800,2015),
-                sep = "",
-                step=5),
+    h3("Adjust:"),
+    h4("Time Range"),
     actionButton("decrement_end_year", "End-date -5ys"),
-    actionButton("increment_end_year", "End-date +5ys")
-    
+    actionButton("increment_end_year", "End-date +5ys"),
+    h4("Filter A"),
+    #checkboxInput(inputId = NULL, "Filter 1", value = FALSE),
+    #checkboxInput(inputId = NULL, "Filter 2", value = FALSE),
+    h4("Filter B")
+    #actionButton("decrement_end_year", "End-date -5ys")
   ),
   
   # Show a plot of the generated distribution
@@ -40,8 +58,25 @@ shinyUI(pageWithSidebar(
     #  Magnitude = factor(dataset$emw),
     #  Latitude = c(-84,-71)
     #),
-    h3(textOutput("caption")),
-    plotOutput("plot"),
-    plotOutput("plot2")
+    tabsetPanel(
+    tabPanel("Main Plot", plotOutput("plot")),
+    tabPanel("K-Medoids Plot", plotOutput("plot2")),
+    tabPanel("Summary"),
+    tabPanel("Table") #tableOutput("plot2")
+    ),
+    column(10, h3(textOutput("caption")), offset=1)
+    )
+  ),
+  
+  #Download Panel
+  fluidRow(
+     wellPanel(
+#       #For downloading CSV textual output
+#       downloadButton(downloadCSV, label = "Download Data as CSV", class = NULL),
+#       #For downloading png visual output
+#       downloadButton(downloadPNG, label = "Download Plots as Image", class = NULL)
+     )
   )
-))
+  
+  )
+)
