@@ -77,19 +77,21 @@ data.small_mag$declustered <- FALSE
   dataset <- subset(m, lat >= 35.5 & lat <= 43.5 & lon <= -71 & lon >= -84)
 
 # Calculate distance matrix for the purposes of clustering.
-# Very rough approx: 1 geodesic degree for ~100 km
+# Very rough approx: 1 geodesic degree for ~100 km 
 coordinates=with(dataset,data.frame(long=lon*100,lat=lat*100,depth=depth))
 #dist  <- earth.dist(coordinates, dist=T)
 
-# Here the distance is still calculated in 2D, i.e. does not use the depth
+# Here the distance is still calculated in 2D, i.e. no depth
 distm  <- dist(coordinates)
-#used to calculate a somwhat optimal number of clusters
+
+#used to calculate the optimal number of clusters
 #library(fpc)
 #pamk.best <- pamk(distm)
 #cat("number of clusters estimated by width:", pamk.best$nc, "\n")
 
 library(rgl)
-with(dataset,plot3d(x=lon,y=lat,z=depth,col=pam(dist,5)$clustering))
+#3D plot below
+with(dataset,plot3d(x=lon,y=lat,z=depth,col=pam(dist,5)$clustering)) #applies this plot to dataset
 
 #Not used
 #dens<-dbscan(dist,MinPts=25,eps=0.43,method="dist")
