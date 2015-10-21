@@ -84,14 +84,28 @@ shinyServer(function(input, output, clientData, session) {
     
     plotdata <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2])
     
-    # Do K-med 
+    # Do K-med (See kmcluster.r for additional details)
+    clustering <- dataset
+    clustering$emw <- clustering$mwsig <- clustering$nstar <- clustering$comment <- 
+      clustering$src <- clustering$declustered <- clustering$datetime <- clustering$mag <- 
+      clustering$magtype <- clustering$nbstations <- clustering$gap <- clustering$distance <-
+      clustering$rms <- clustering$source <- clustering$eventid <- clustering$network <-
+      clustering$f_NE <- clustering$f_1997GSC <- clustering$f_1982NE <- NULL
+    
+    Lon = clustering[1]
+    Lat = clustering[2]
+    dhav = distHaversine(c(0,0), cbind(Lon, Lat))
+    
+    fit <- pam(dhav,4)
+    clustering <- merge(clustering,fit$data)
+    
     
     # Graph it.
     pp <- ggplot() +
       geom_polygon(aes(long,lat, group=group), fill="palegreen3", colour="grey60", data=county) +
       geom_polygon( data=states, aes(x=long, y=lat, group = group),colour="royalblue4", fill=NA) +
       annotate("rect", xmin=-84, xmax=-71, ymin=35.5, ymax=43.5, colour="black", size=1, fill="blue", alpha="0.01") +
-      geom_point(data=plotdata, size=3, alpha = .7, aes(x=lon, y=lat, color=emw)) +
+      geom_point(data=clustering, size=3, alpha = .7, aes(x=lon, y=lat, color=V1)) +
       scale_color_gradient(low="blue", high="red") +
       theme(plot.background = element_rect(fill = 'grey')) +
       geom_abline(intercept = 3, slope = -.45, color = "grey", size = 1)

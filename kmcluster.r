@@ -45,6 +45,10 @@ clustering <- merge(clustering,fit$data)
 #deg.dist(43.5,-43,35.5,43.5)
 #fit <- relational.clustering(clustering[1:2], clusters = 2)
 #pam(daisy(x, metric = "manhattan"), 2, diss = TRUE)
+
+#color.scale(V1,redrange=c(8380000,8665000),orangerange=c(8665000,8950000),greenrange=c(8950000,9235000),bluerange=c(9235000,9520000),
+#           extremes=NA,na.color=NA))
+
 pp <- ggplot() +
   geom_polygon(aes(long,lat, group=group), fill="palegreen3", colour="grey60", data=county) +
   geom_polygon( data=states, aes(x=long, y=lat, group = group),colour="royalblue4", fill=NA) +
