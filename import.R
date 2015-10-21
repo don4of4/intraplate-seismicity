@@ -1,9 +1,11 @@
-#install.packages("maps")
-#install.packages("dplyr")
-#install.packages("ggplot2")
-#install.packages("fpc", dependencies = TRUE)
-#install.packages("fossil")
-#install.packages("WeightedCluster")
+install.packages("maps")
+install.packages("dplyr")
+install.packages("fpc", dependencies = TRUE)
+install.packages("fossil")
+install.packages("WeightedCluster")
+install.packages("rgl")
+install.packages("ggplot2")
+
 
 library(ggplot2)
 library(maps)
@@ -12,6 +14,11 @@ library(dplyr)
 library(fpc)
 library(fossil)
 library(WeightedCluster)
+library(mclust)
+library(cluster) 
+library(fossil)
+library(geosphere)
+library(ggfortify)
 
 data.neic <- read.table("data/NEIC_HM_2014.csv", header = TRUE, sep = ",")
 colnames(data.neic) <- c("emw","lon","lat","depth","y","m","d", "h", "m.1", "s", "mwsig", "nstar","comment")
@@ -70,10 +77,22 @@ data.small_mag$declustered <- FALSE
   dataset <- subset(m, lat >= 35.5 & lat <= 43.5 & lon <= -71 & lon >= -84)
 
 # Calculate distance matrix for the purposes of clustering.
-coordinates  <- data.frame(long=dataset$lon, lat=dataset$lat)
-dist  <- earth.dist(df, dist=T)
-dens<-dbscan(dist,MinPts=25,eps=0.43,method="dist")
+# Very rough approx: 1 geodesic degree for ~100 km
+coordinates=with(dataset,data.frame(long=lon*100,lat=lat*100,depth=depth))
+#dist  <- earth.dist(coordinates, dist=T)
 
+# Here the distance is still calculated in 2D, i.e. does not use the depth
+distm  <- dist(coordinates)
+#used to calculate a somwhat optimal number of clusters
+#library(fpc)
+#pamk.best <- pamk(distm)
+#cat("number of clusters estimated by width:", pamk.best$nc, "\n")
+
+library(rgl)
+with(dataset,plot3d(x=lon,y=lat,z=depth,col=pam(dist,5)$clustering))
+
+#Not used
+#dens<-dbscan(dist,MinPts=25,eps=0.43,method="dist")
 
 target_states <- c( "pennsylvania", "new york", "new jersey", "virginia", "kentucky","rhode island",
                     "massachusetts","vermont","new hampshire", "delaware", "maryland", "west virginia", 
@@ -84,15 +103,24 @@ county <- map_data("county")
 states <- subset(all_states, region %in% target_states)
 county <- subset(county, region %in% target_states)
 
-p <- ggplot() +
+pp <- ggplot() +
   geom_polygon(aes(long,lat, group=group), fill="palegreen3", colour="grey60", data=county) +
   geom_polygon( data=states, aes(x=long, y=lat, group = group),colour="royalblue4", fill=NA) +
   annotate("rect", xmin=-84, xmax=-71, ymin=35.5, ymax=43.5, colour="black", size=1, fill="blue", alpha="0.01") +
-  geom_point(size=2, alpha = .7, aes(dataset$lon, dataset$lat, color=dataset$emw)) +
-  scale_color_gradient(low="blue", high="red") +
-  theme(plot.background = element_rect(fill = 'grey')) +
-  geom_abline(intercept = 3, slope = -.45, color = "grey", size = 1)
+  geom_point(size=2, alpha = .7, aes(dataset$lon, dataset$lat, color=factor(pam(dist,5)$clustering))) +
+  #geom_point(data=dataset, size=3, alpha = .7, aes(x=lon, y=lat,color=pam(dist,5)$clustering)) +
+  #geom_point(data=fit,size=3,alpha=.7,aes(color=factor(fit$clustering))) +
+  coord_fixed()
 
-d <- dbscan(dataset, 10,showplot = 2)
+#p <- ggplot() +
+#  geom_polygon(aes(long,lat, group=group), fill="palegreen3", colour="grey60", data=county) +
+#  geom_polygon( data=states, aes(x=long, y=lat, group = group),colour="royalblue4", fill=NA) +
+#  annotate("rect", xmin=-84, xmax=-71, ymin=35.5, ymax=43.5, colour="black", size=1, fill="blue", alpha="0.01") +
+#  geom_point(size=2, alpha = .7, aes(dataset$lon, dataset$lat, color=dataset$emw)) +
+#  scale_color_gradient(low="blue", high="red") +
+#  theme(plot.background = element_rect(fill = 'grey')) +
+#  geom_abline(intercept = 3, slope = -.45, color = "grey", size = 1)
+
+#d <- dbscan(dataset, 10,showplot = 2)
 
 
