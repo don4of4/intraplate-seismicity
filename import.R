@@ -1,11 +1,11 @@
-install.packages("maps")
-install.packages("dplyr")
-install.packages("fpc", dependencies = TRUE)
-install.packages("fossil")
-install.packages("WeightedCluster")
-install.packages("rgl")
-install.packages("ggplot2")
-
+#install.packages("maps")
+#install.packages("dplyr")
+#install.packages("fpc", dependencies = TRUE)
+#install.packages("fossil")
+#install.packages("WeightedCluster")
+#install.packages("rgl")
+#install.packages("ggplot2")
+#install.packages("scatterplot3d")
 
 library(ggplot2)
 library(maps)
@@ -19,6 +19,7 @@ library(cluster)
 library(fossil)
 library(geosphere)
 library(ggfortify)
+library(scatterplot3d)
 
 data.neic <- read.table("data/NEIC_HM_2014.csv", header = TRUE, sep = ",")
 colnames(data.neic) <- c("emw","lon","lat","depth","y","m","d", "h", "m.1", "s", "mwsig", "nstar","comment")
@@ -87,11 +88,17 @@ distm  <- dist(coordinates)
 #used to calculate the optimal number of clusters
 #library(fpc)
 #pamk.best <- pamk(distm)
+#kfold / information criteria to determine optimal number of clusters
 #cat("number of clusters estimated by width:", pamk.best$nc, "\n")
 
-library(rgl)
+#integrating kmedoids and density
+#correlation between clustering and stations? relative density/change of 
+# stations vs. relative density/change of clustering
+#cluster with KMedoids, then calculate density, 
+#then ask is density high enough to consdier a cluster
+#incorporate density clustering
 #3D plot below
-with(dataset,plot3d(x=lon,y=lat,z=depth,col=pam(dist,5)$clustering)) #applies this plot to dataset
+with(dataset,scatterplot3d(x = lon, y = lat, z = depth, color = pam(distm, 5)$clustering)) #applies this plot to dataset
 
 #Not used
 #dens<-dbscan(dist,MinPts=25,eps=0.43,method="dist")
@@ -109,7 +116,7 @@ pp <- ggplot() +
   geom_polygon(aes(long,lat, group=group), fill="palegreen3", colour="grey60", data=county) +
   geom_polygon( data=states, aes(x=long, y=lat, group = group),colour="royalblue4", fill=NA) +
   annotate("rect", xmin=-84, xmax=-71, ymin=35.5, ymax=43.5, colour="black", size=1, fill="blue", alpha="0.01") +
-  geom_point(size=2, alpha = .7, aes(dataset$lon, dataset$lat, color=factor(pam(dist,5)$clustering))) +
+  geom_point(size=2, alpha = .7, aes(dataset$lon, dataset$lat, color=factor(pam(distm,5)$clustering))) +
   #geom_point(data=dataset, size=3, alpha = .7, aes(x=lon, y=lat,color=pam(dist,5)$clustering)) +
   #geom_point(data=fit,size=3,alpha=.7,aes(color=factor(fit$clustering))) +
   coord_fixed()

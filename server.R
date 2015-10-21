@@ -54,10 +54,10 @@ shinyServer(function(input, output, clientData, session) {
   #  updateSliderInput("bins", value = c(input$bins[1],input$bins[2]+5))
   #})
   observeEvent(input$increment_end_year, {
-    updateSliderInput(session, "bins", value = c(input$bins[1],input$bins[2]+5))
+    updateSliderInput(session, "bins", value = c(input$bins[1],input$bins[2]+1))
   })
   observeEvent(input$decrement_end_year, {
-    updateSliderInput(session, "bins", value = c(input$bins[1],input$bins[2]-5))
+    updateSliderInput(session, "bins", value = c(input$bins[1],input$bins[2]-1))
   })
   
   # Generate a plot of the requested variables
