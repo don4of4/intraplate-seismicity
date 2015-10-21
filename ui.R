@@ -42,8 +42,8 @@ shinyUI(
   sidebarPanel(
     h3("Adjust:"),
     h4("Time Range"),
-    actionButton("decrement_end_year", "End-date -5ys"),
-    actionButton("increment_end_year", "End-date +5ys"),
+    actionButton("decrement_end_year", "End-date -1ys"),
+    actionButton("increment_end_year", "End-date +1ys"),
     h4("Filter A"),
     #checkboxInput(inputId = NULL, "Filter 1", value = FALSE),
     #checkboxInput(inputId = NULL, "Filter 2", value = FALSE),

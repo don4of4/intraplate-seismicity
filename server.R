@@ -54,10 +54,10 @@ shinyServer(function(input, output, clientData, session) {
   #  updateSliderInput("bins", value = c(input$bins[1],input$bins[2]+5))
   #})
   observeEvent(input$increment_end_year, {
-    updateSliderInput(session, "bins", value = c(NA,input$bins[2]+5))
+    updateSliderInput(session, "bins", value = c(NA,input$bins[2]+1))
   })
   observeEvent(input$decrement_end_year, {
-    updateSliderInput(session, "bins", value = c(NA,input$bins[2]-5))
+    updateSliderInput(session, "bins", value = c(NA,input$bins[2]-1))
   })
   
   # Generate a plot of the requested variables
@@ -72,8 +72,8 @@ shinyServer(function(input, output, clientData, session) {
       geom_polygon( data=states, aes(x=long, y=lat, group = group),colour="royalblue4", fill=NA) +
       annotate("rect", xmin=-84, xmax=-71, ymin=35.5, ymax=43.5, colour="black", size=1, fill="blue", alpha="0.01") +
       geom_point(data=plotstations, size=4, alpha = .7, aes(x=lon, y=lat), color="yellow") +
-      geom_point(data=plotdata, size=3, alpha = .7, aes(x=lon, y=lat, color=emw)) +
-      scale_color_gradient(low="blue", high="red") +
+      #geom_point(data=plotdata, size=3, alpha = .7, aes(x=lon, y=lat, color=emw)) +
+      #scale_color_gradient(low="blue", high="red") +
       theme(plot.background = element_rect(fill = 'grey')) +
       geom_abline(intercept = 3, slope = -.45, color = "grey", size = 1)
 
