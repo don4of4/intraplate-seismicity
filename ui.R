@@ -59,7 +59,15 @@ shinyUI(
     #  Latitude = c(-84,-71)
     #),
     tabsetPanel(
-    tabPanel("Main Plot", plotOutput("plot")),
+    tabPanel("Main Plot", 
+             plotOutput("plot",
+                        dblclick = "plot_dblclick",
+                        brush = brushOpts(
+                          id = "plot_brush",
+                          resetOnNew = TRUE
+                        )
+                        )
+             ),
     tabPanel("K-Medoids Plot", plotOutput("plot2")),
     tabPanel("Summary"),
     tabPanel("Table") #tableOutput("plot2")

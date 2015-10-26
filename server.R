@@ -98,4 +98,32 @@ shinyServer(function(input, output, clientData, session) {
     
     print(pp)
   })
+#})
+
+# Single zoomable plot (on left)
+ranges <- reactiveValues(x = NULL, y = NULL)
+
+#Use output$plot2
+
+# output$plot1 <- renderPlot({
+#   ggplot(mtcars, aes(wt, mpg)) +
+#     geom_point() +
+#     coord_cartesian(xlim = ranges$x, ylim = ranges$y)
+# })
+
+# When a double-click happens, check if there's a brush on the plot.
+# If so, zoom to the brush bounds; if not, reset the zoom.
+observeEvent(input$plot_dblclick, {
+  brush <- input$plot_brush
+  if (!is.null(brush)) {
+    ranges$x <- c(brush$xmin, brush$xmax)
+    ranges$y <- c(brush$ymin, brush$ymax)
+    
+  } else {
+    ranges$x <- NULL
+    ranges$y <- NULL
+  }
+})
+
+
 })
