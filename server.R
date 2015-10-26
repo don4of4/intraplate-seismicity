@@ -5,6 +5,7 @@
 # http://www.rstudio.com/shiny/
 #
 
+
 library(shiny)
 library(datasets)
 library(shinyRGL)
@@ -63,11 +64,22 @@ shinyServer(function(input, output, clientData, session) {
     updateSliderInput(session, "bins", value = c(input$bins[1],input$bins[2]-1))
   })
   
-  # Generate a plot of the requested variables
+  
+  ## Generate a plot of the requested variables ##
+  
+  #Stations Plot:
+  
+  #Zoom features for Plot
+  #ranges <- reactiveValues(lon = NULL, lat = NULL)
+  
   output$plot <- renderPlot({
+    
+    #ranges <- reactiveValues(latmin = 33.5, latmax = 45.5, lonmax = -69, lonmin = 85)
     
     plotdata <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2])
     plotstations <- subset(stations.iris, format(start, "%Y") >= input$bins[1] & 
+                             #format(start, "%Y") <= input$bins[2] & lat >= ranges$latmin & 
+                             #lat <= ranges$latmax & lon <= ranges$lonmax & lon >= ranges$lonmin)
                              format(start, "%Y") <= input$bins[2] & lat >= 33.5 & 
                              lat <= 45.5 & lon <= -69 & lon >= -85)
     pp <- ggplot() +
@@ -75,6 +87,7 @@ shinyServer(function(input, output, clientData, session) {
       geom_polygon( data=states, aes(x=long, y=lat, group = group),colour="royalblue4", fill=NA) +
       annotate("rect", xmin=-84, xmax=-71, ymin=35.5, ymax=43.5, colour="black", size=1, fill="blue", alpha="0.01") +
       geom_point(data=plotstations, size=4, alpha = .7, aes(x=lon, y=lat), color="yellow") +
+      #coord_cartesian(xlim = ranges$x, ylim = ranges$y) + #for brush frame
       #geom_point(data=plotdata, size=3, alpha = .7, aes(x=lon, y=lat, color=emw)) +
       #scale_color_gradient(low="blue", high="red") +
       theme(plot.background = element_rect(fill = 'grey')) +
@@ -82,6 +95,40 @@ shinyServer(function(input, output, clientData, session) {
     
     print(pp)
   })
+  
+  #ranges <- reactiveValues(x = NULL, y = NULL)
+  
+  # When a double-click happens, check if there's a brush on the plot.
+  # If so, zoom to the brush bounds; if not, reset the zoom.
+  observeEvent(input$plot_dblclick, {
+    brush <- input$plot_brush
+    if (!is.null(brush)) {
+      #plotstations <- subset(stations.iris, format(start, "%Y") >= input$bins[1] & 
+                               #format(start, "%Y") <= input$bins[2] & lat >= latmin & 
+                               #lat <= latmax & lon <= lonmax & lon >= lonmin)
+      #                        format(start, "%Y") <= input$bins[2] & lat >= 40 & 
+      #                       lat <= 45.5 & lon <= -80 & lon >= -85)
+      #format(start, "%Y") <= input$bins[2] & lat >= 35 & lat <= 40 & lon <= -75 & lon >= -80
+      #ranges$x <- c(brush$xmin, brush$xmax)
+      #ranges$y <- c(brush$ymin, brush$ymax)
+      
+      #plotstations <- subset(plotstations, format(start, "%Y") >= input$bins[1] &
+      #                             format(start, "%Y") <= input$bins[2] & lat >= 40 & 
+      #                             lat <= 45.5 & lon <= -80 & lon >= -85)
+      
+      #test.data <- plotstationsZoom
+      
+      #ranges$x <- c(brush$xmin, brush$xmax)
+      #ranges$y <- c(brush$ymin, brush$ymax)
+      
+      
+    } else {
+      ranges$x <- NULL
+      ranges$y <- NULL
+    }
+  })
+  
+  #Earthquakes Plot:
   
   output$plot2 <- renderPlot({
       plotdata <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2])
@@ -98,6 +145,8 @@ shinyServer(function(input, output, clientData, session) {
       print(pp)
   })
     
+  #K-Meds Plot:
+  
   output$plot3 <- renderPlot({
     
     plotdata <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2])
@@ -126,11 +175,8 @@ shinyServer(function(input, output, clientData, session) {
       print(pp)
     }    
   })
-<<<<<<< HEAD
-
-
-
-=======
+  
+  #Density Plot:
   
   output$myWebGL <- renderWebGL({
     plotdata <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2])
@@ -143,5 +189,53 @@ shinyServer(function(input, output, clientData, session) {
     plot(d,cont=(1:5)*1/5*100,drawpoints=TRUE)
   })
   
->>>>>>> 11302c8c4c75d035ac44ff94c26a4776e5e9a90a
+  #Histogram Plot
+  
+  output$histoPlot <- renderPlot({
+    #For histogram CE
+    plotdata1 <- subset(dataset, format(datetime, "%Y") >= 1800 & format(datetime, "%Y") <= input$bins[2])
+    #For histogram TE
+    plotdata2 <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2])
+    
+    selectHisto <- function(histoParam){
+      switch(histoParam,
+             magvce = hist(plotdata1$emw, breaks = 8, main = "Magnitude vs Cumulative # of Events", xlab = "Magnitude", col = 'darkgreen', border = 'white'), 
+             magvte = hist(plotdata2$emw, breaks = 8, main = "Magnitude vs # of Events", xlab = "Magnitude", col = 'darkblue', border = 'white'),
+             cevt = hist(plotdata1$datetime, breaks = 8, main = "Cumulative # of Events vs Time", xlab = "Time", col = 'darkred', border = 'white'),
+             tevd = hist(plotdata2$emw, breaks = 8, main = "Total # of Events vs Depth", xlab = "Depth", col = 'darkorange', border = 'white')
+      )
+    }
+    
+    selectHisto(input$histoParam)
+    
+  })
+  
+
+##TEST PLOT##
+
+# Single zoomable plot (on left)
+ranges <- reactiveValues(x = NULL, y = NULL)
+
+output$tplot <- renderPlot({
+  ggplot(mtcars, aes(wt, mpg)) +
+    geom_point() +
+    coord_cartesian(xlim = ranges$x, ylim = ranges$y)
+})
+
+# When a double-click happens, check if there's a brush on the plot.
+# If so, zoom to the brush bounds; if not, reset the zoom.
+observeEvent(input$tplot_dblclick, {
+  brush <- input$tplot_brush
+  if (!is.null(brush)) {
+    ranges$x <- c(brush$xmin, brush$xmax)
+    ranges$y <- c(brush$ymin, brush$ymax)
+    
+  } else {
+    ranges$x <- NULL
+    ranges$y <- NULL
+  }
+  })
+
+#END TEST PLOT FUNCTIONS
+
 })

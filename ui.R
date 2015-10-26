@@ -45,9 +45,12 @@ shinyUI(
     h4("Time Range"),
     actionButton("decrement_end_year", "End-date -1ys"),
     actionButton("increment_end_year", "End-date +1ys"),
-    h4("Filter A"),
-    #checkboxInput(inputId = NULL, "Filter 1", value = FALSE),
-    #checkboxInput(inputId = NULL, "Filter 2", value = FALSE),
+    h4("Histogram Parameters"),
+    radioButtons("histoParam", "Display:",
+                 c("Magnitude vs Cumulative # of Events" = "magvce",
+                   "Magnitude vs Total # of Events" = "magvte",
+                   "Cumulative # of Events vs Time" = "cevt",
+                   "Total # of Events vs Depth" = "tevd"), selected="magvte", inline=TRUE),
     h4("Filter B")
     #actionButton("decrement_end_year", "End-date -5ys")
   ),
@@ -60,16 +63,33 @@ shinyUI(
     #  Latitude = c(-84,-71)
     #),
     tabsetPanel(
-<<<<<<< HEAD
+#<<<<<<< HEAD
     
-=======
-      tabPanel("Stations Plot", plotOutput("plot")),
+#=======
+      tabPanel("Stations Plot",
+               plotOutput(
+                 "plot",
+                 dblclick = "plot_dblclick",
+                 brush = brushOpts(
+                   id = "plot_brush",
+                   resetOnNew = TRUE
+                   )
+                 )
+               ),
       tabPanel("Eathquakes Plot", plotOutput("plot2")),
       tabPanel("K-Medoids Plot", plotOutput("plot3")),
       tabPanel("Density Plot RGL not working", webGLOutput("myWebGL")),
-      tabPanel("Summary"),
-      tabPanel("Table") #tableOutput("plot2")
->>>>>>> 11302c8c4c75d035ac44ff94c26a4776e5e9a90a
+      tabPanel("Test Plot",
+               plotOutput(
+                 "tplot",
+                 dblclick = "tplot_dblclick",
+                 brush = brushOpts(
+                   id = "tplot_brush",
+                   resetOnNew = TRUE
+                   )
+                 )
+               ),
+      tabPanel("Histogram", plotOutput("histoPlot"))
     ),
     column(10, h3(textOutput("caption")), offset=1)
     )

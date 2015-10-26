@@ -5,6 +5,8 @@
 #install.packages("fossil")
 #install.packages("WeightedCluster")
 #install.packages("shinyRGL")
+#install.packages("scatterplot3d")
+#install.packages("ks", dependencies=TRUE)
 
 library(ggplot2)
 library(maps)
@@ -102,7 +104,7 @@ target_states <- c( "pennsylvania", "new york", "new jersey", "virginia", "kentu
 states <- subset(all_states, region %in% target_states)
 county <- subset(county, region %in% target_states)
 
-runApp(".") #automagically
+runApp(".") #automatically
 
 #p <- ggplot() +
 #  geom_polygon(aes(long,lat, group=group), fill="palegreen3", colour="grey60", data=county) +
