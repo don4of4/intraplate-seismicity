@@ -1,9 +1,10 @@
-install.packages("maps")
-install.packages("dplyr")
-install.packages("ggplot2")
-install.packages("fpc", dependencies = TRUE)
-install.packages("fossil")
-install.packages("WeightedCluster")
+#install.packages("maps")
+#install.packages("dplyr")
+#install.packages("ggplot2")
+#install.packages("fpc", dependencies = TRUE)
+#install.packages("fossil")
+#install.packages("WeightedCluster")
+#install.packages("shinyRGL")
 
 library(ggplot2)
 library(maps)
@@ -12,6 +13,13 @@ library(dplyr)
 library(fpc)
 library(fossil)
 library(WeightedCluster)
+library(shiny)
+library(rgl)
+library(shinyRGL)
+
+install.packages("devtools")
+library(devtools)
+install_github("shinyRGL", "trestletech")
 
 data.neic <- read.table("data/NEIC_HM_2014.csv", header = TRUE, sep = ",")
 colnames(data.neic) <- c("emw","lon","lat","depth","y","m","d", "h", "m.1", "s", "mwsig", "nstar","comment")
@@ -34,65 +42,75 @@ data.small_mag$declustered <- FALSE
 
 
 # Date formatting
-  options(digits.secs=3)
-  data.neic$datetime <- ISOdatetime(data.neic$y, data.neic$m, data.neic$d, data.neic$h, data.neic$m.1, data.neic$s, tz = "")
-  data.anss$datetime <- as.POSIXct(data.anss$datetime, tz = "")
-  stations.iris$start <- strptime(stations.iris$start,format="%Y-%m-%dT%H:%M:%OS")
-  stations.iris$end <- strptime(stations.iris$end,format="%Y-%m-%dT%H:%M:%OS")
-  data.small_mag$datetime <- paste0(data.small_mag$date, "T", data.small_mag$time)
-  #strptime(data.small_mag$datetime, format="%m/%d/%yT%H:%M:%OS")
-  # FIXME: Hours in this data is invalid; most tuples are > 24.  Why?
+options(digits.secs=3)
+data.neic$datetime <- ISOdatetime(data.neic$y, data.neic$m, data.neic$d, data.neic$h, data.neic$m.1, data.neic$s, tz = "")
+data.anss$datetime <- as.POSIXct(data.anss$datetime, tz = "")
+stations.iris$start <- strptime(stations.iris$start,format="%Y-%m-%dT%H:%M:%OS")
+stations.iris$end <- strptime(stations.iris$end,format="%Y-%m-%dT%H:%M:%OS")
+data.small_mag$datetime <- paste0(data.small_mag$date, "T", data.small_mag$time)
+#strptime(data.small_mag$datetime, format="%m/%d/%yT%H:%M:%OS")
+# FIXME: Hours in this data is invalid; most tuples are > 24.  Why?
 
 # Rename lon and lat
-  data.neic$y <- data.neic$m <- data.neic$d <- data.neic$h <- data.neic$m.1 <- data.neic$s <- NULL
-  
+data.neic$y <- data.neic$m <- data.neic$d <- data.neic$h <- data.neic$m.1 <- data.neic$s <- NULL
+
 
 # Magnitude to mw
-  # Check event zone.
-  data.anss$f_NE <- ifelse(data.anss$lat > -0.45*data.anss$lon + 3, 1, 0)
-  data.anss$f_1997GSC <- ifelse(data.anss$lat > -0.45*data.anss$lon + 3, 1, 0)
-  data.anss$f_1982NE <- ifelse(data.anss$NE == 1 && data.anss$source != 'GSC' && format(data.anss$datetime, "%Y") < 1982, 1, 0)
+# Check event zone.
+data.anss$f_NE <- ifelse(data.anss$lat > -0.45*data.anss$lon + 3, 1, 0)
+data.anss$f_1997GSC <- ifelse(data.anss$lat > -0.45*data.anss$lon + 3, 1, 0)
+data.anss$f_1982NE <- ifelse(data.anss$NE == 1 && data.anss$source != 'GSC' && format(data.anss$datetime, "%Y") < 1982, 1, 0)
 
-  data.anss$emw <- ifelse(data.anss$magtype == "ML", 0.806*data.anss$mag + 0.633,
-                   ifelse(data.anss$magtype == "Mb", data.anss$mag - 0.316 - 0.118*data.anss$f_NE - 0.192*data.anss$f_1997GSC + 0.280*data.anss$f_1982NE,
-                   ifelse(data.anss$magtype == "Md", 0.806*data.anss$mag + 0.633,
-                   ifelse(data.anss$magtype == "Mx", -1,
-                   ifelse(data.anss$magtype == "Mh", -1,
-                   ifelse(data.anss$magtype == "Mc",0.806*data.anss$mag + 0.633,
-                   ifelse(data.anss$magtype == "Unk", -1, -2)))))))
+data.anss$emw <- ifelse(data.anss$magtype == "ML", 0.806*data.anss$mag + 0.633,
+                        ifelse(data.anss$magtype == "Mb", data.anss$mag - 0.316 - 0.118*data.anss$f_NE - 0.192*data.anss$f_1997GSC + 0.280*data.anss$f_1982NE,
+                               ifelse(data.anss$magtype == "Md", 0.806*data.anss$mag + 0.633,
+                                      ifelse(data.anss$magtype == "Mx", -1,
+                                             ifelse(data.anss$magtype == "Mh", -1,
+                                                    ifelse(data.anss$magtype == "Mc",0.806*data.anss$mag + 0.633,
+                                                           ifelse(data.anss$magtype == "Unk", -1, -2)))))))
 
-  # Filter out tuples with unknown mag
-  data.anss <- subset(data.anss, data.anss$emw > 0)
+# Filter out tuples with unknown mag
+data.anss <- subset(data.anss, data.anss$emw > 0)
 
 # Filter out based on lat and long
-  m <- rbind.fill(data.neic, data.anss)
-  m <- dplyr::bind_rows(data.neic, data.anss)
-  dataset <- subset(m, lat >= 35.5 & lat <= 43.5 & lon <= -71 & lon >= -84)
+m <- rbind.fill(data.neic, data.anss)
+m <- dplyr::bind_rows(data.neic, data.anss)
+dataset <- subset(m, lat >= 35.5 & lat <= 43.5 & lon <= -71 & lon >= -84)
 
 # Calculate distance matrix for the purposes of clustering.
-coordinates  <- data.frame(long=dataset$lon, lat=dataset$lat)
-dist  <- earth.dist(df, dist=T)
-dens<-dbscan(dist,MinPts=25,eps=0.43,method="dist")
+# Very rough approx: 1 geodesic degree is 100 km
+#coordinates=with(dataset,data.frame(long=lon,lat=lat,depth=depth))
+#dist  <- earth.dist(coordinates, dist=T)
+# Here the distance is still calculated in 2D, i.e. does not use the depth
+#distm  <- dist(coordinates)
+#used to calculate a somwhat optimal number of clusters
+#library(fpc)
+#pamk.best <- pamk(distm)
+#cat("number of clusters estimated by optimum average silhouette width:", pamk.best$nc, "\n")
 
+#with(dataset,plot3d(x=lon,y=lat,z=depth,col=pam(distm,5)$clustering))
+
+#Not used
+#dens<-dbscan(dist,MinPts=25,eps=0.43,method="dist")
 
 target_states <- c( "pennsylvania", "new york", "new jersey", "virginia", "kentucky","rhode island",
                     "massachusetts","vermont","new hampshire", "delaware", "maryland", "west virginia", 
                     "north carolina", "tennessee", "ohio", "connecticut", "district of columbia" )
-all_states <- map_data("state")
-county <- map_data("county")
+#all_states <- map_data("state")
+#county <- map_data("county")
 
 states <- subset(all_states, region %in% target_states)
 county <- subset(county, region %in% target_states)
 
-p <- ggplot() +
-  geom_polygon(aes(long,lat, group=group), fill="palegreen3", colour="grey60", data=county) +
-  geom_polygon( data=states, aes(x=long, y=lat, group = group),colour="royalblue4", fill=NA) +
-  annotate("rect", xmin=-84, xmax=-71, ymin=35.5, ymax=43.5, colour="black", size=1, fill="blue", alpha="0.01") +
-  geom_point(size=2, alpha = .7, aes(dataset$lon, dataset$lat, color=dataset$emw)) +
-  scale_color_gradient(low="blue", high="red") +
-  theme(plot.background = element_rect(fill = 'grey')) +
-  geom_abline(intercept = 3, slope = -.45, color = "grey", size = 1)
+runApp(".") #automagically
 
-d <- dbscan(dataset, 10,showplot = 2)
+#p <- ggplot() +
+#  geom_polygon(aes(long,lat, group=group), fill="palegreen3", colour="grey60", data=county) +
+#  geom_polygon( data=states, aes(x=long, y=lat, group = group),colour="royalblue4", fill=NA) +
+#  annotate("rect", xmin=-84, xmax=-71, ymin=35.5, ymax=43.5, colour="black", size=1, fill="blue", alpha="0.01") +
+#  geom_point(size=2, alpha = .7, aes(dataset$lon, dataset$lat, color=dataset$emw)) +
+#  scale_color_gradient(low="blue", high="red") +
+#  theme(plot.background = element_rect(fill = 'grey')) +
+#  geom_abline(intercept = 3, slope = -.45, color = "grey", size = 1)
 
-
+#d <- dbscan(dataset, 10,showplot = 2)
