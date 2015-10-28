@@ -8,7 +8,7 @@
 
 library(shiny)
 library(datasets)
-library(shinyRGL)
+#library(shinyRGL)
 #library(plyr)
 #library(dplyr)
 library(ggplot2)
@@ -151,44 +151,30 @@ shinyServer(function(input, output, clientData, session) {
     
     plotdata <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2])
     coordinates=with(plotdata,data.frame(long=lon,lat=lat,depth=depth))
+    calc_coordinates=with(plotdata,data.frame(long=lon*100,lat=lat*100,depth=log1p(depth)))
     
     # Do K-med 
     #dist  <- earth.dist(coordinates, dist=T)
     # Here the distance is still calculated in 2D, i.e. does not use the depth
-    distm  <- dist(coordinates)
+    distm  <- dist(calc_coordinates)
     #clust_result=pam(distm,5)
-    clustering=pam(distm,pamk(coordinates,criterion="multiasw",usepam=FALSE)$nc,cluster.only=TRUE)
+    clustering=pam(distm,pamk(calc_coordinates,criterion="multiasw",usepam=FALSE)$nc,cluster.only=TRUE)
     # Graph it.
     with(plotdata,scatterplot3d(x=lon,y=lat,z=-depth,color=clustering))
     
-    if (FALSE) {
-      pp <- ggplot() +
-        geom_polygon(aes(long,lat, group=group), fill="palegreen3", colour="grey60", data=county) +
-        geom_polygon( data=states, aes(x=long, y=lat, group = group),colour="royalblue4", fill=NA) +
-        annotate("rect", xmin=-84, xmax=-71, ymin=35.5, ymax=43.5, colour="black", size=1, fill="blue", alpha="0.01") +
-        geom_point(size=2, alpha = .7, aes(plotdata$lon, plotdata$lat, color=factor(clust_result$clustering))) +
-        scale_color_gradient(low="blue", high="red") +
-        theme(plot.background = element_rect(fill = 'grey')) +
-        geom_abline(intercept = 3, slope = -.45, color = "grey", size = 1) +
-        coord_fixed()
-      
-      print(pp)
-    }    
   })
   
-  #Density Plot:
-  
-  output$myWebGL <- renderWebGL({
+  output$plot4 <- renderPlot({
     plotdata <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2])
-    coordinates=with(plotdata,data.frame(long=lon,lat=lat,depth=-depth))
+    coordinates=with(plotdata,data.frame(long=lon,lat=lat,depth=depth))
+    calc_coordinates=with(plotdata,data.frame(long=lon*100,lat=lat*100,depth=depth))
+    model=dbscan(calc_coordinates,MinPts=25,eps=43)
+    clusters=predict(model,calc_coordinates)+1
+    with(coordinates,scatterplot3d(x=long,y=lat,z=-depth,color=clusters))
     
-    # Do density estimation
-    precision=50
-    d<<-kde(coordinates,compute.cont=TRUE,gridsize=c(precision,precision,precision))
-    # Graph it -> problem integrating rgl and shiny (shinyRGL does not work here for it is not developed anymore, need to find another way, perhaps save to file and generate html link)
-    plot(d,cont=(1:5)*1/5*100,drawpoints=TRUE)
   })
   
+
   #Histogram Plot
   
   output$histoPlot <- renderPlot({

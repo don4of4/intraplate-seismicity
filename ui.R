@@ -78,7 +78,7 @@ shinyUI(
                ),
       tabPanel("Eathquakes Plot", plotOutput("plot2")),
       tabPanel("K-Medoids Plot", plotOutput("plot3")),
-      tabPanel("Density Plot RGL not working", webGLOutput("myWebGL")),
+      tabPanel("Density Plot (dbscan)", plotOutput("plot4")),
       tabPanel("Test Plot",
                plotOutput(
                  "tplot",

@@ -98,8 +98,8 @@ dataset <- subset(m, lat >= 35.5 & lat <= 43.5 & lon <= -71 & lon >= -84)
 target_states <- c( "pennsylvania", "new york", "new jersey", "virginia", "kentucky","rhode island",
                     "massachusetts","vermont","new hampshire", "delaware", "maryland", "west virginia", 
                     "north carolina", "tennessee", "ohio", "connecticut", "district of columbia" )
-#all_states <- map_data("state")
-#county <- map_data("county")
+all_states <- map_data("state")
+county <- map_data("county")
 
 states <- subset(all_states, region %in% target_states)
 county <- subset(county, region %in% target_states)
