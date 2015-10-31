@@ -79,6 +79,7 @@ shinyUI(
       tabPanel("Eathquakes Plot", plotOutput("plot2")),
       tabPanel("K-Medoids Plot", plotOutput("plot3")),
       tabPanel("Density Plot (dbscan)", plotOutput("plot4")),
+      tabPanel("New plot", plotOutput("plot5")),
       tabPanel("Test Plot",
                plotOutput(
                  "tplot",

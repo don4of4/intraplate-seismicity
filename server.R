@@ -174,6 +174,17 @@ shinyServer(function(input, output, clientData, session) {
     
   })
   
+  #install.packages("ks")
+  library(ks)
+  output$plot5 <- renderPlot({
+    plotdata <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2])
+    calc_coordinates=with(plotdata,data.frame(long=lon*100,lat=lat*100,depth=-depth))
+    precision=50
+    d<<-kde(calc_coordinates,compute.cont=TRUE,gridsize=c(precision,precision,precision))
+    plot(d,cont=(1:5)*1/5*100,drawpoints=TRUE)
+    
+  })
+  
 
   #Histogram Plot
   
