@@ -40,20 +40,45 @@ shinyUI(
   
   # Sidebar with a slider input for number of bins
   sidebarLayout(
+    #fluidRow(column=6,
   sidebarPanel(
-    h3("Adjust:"),
-    h4("Time Range"),
+    h3("Additional Functions"),
+    
+    h4("Set Time Range"),
     actionButton("decrement_end_year", "End-date -1ys"),
     actionButton("increment_end_year", "End-date +1ys"),
-    h4("Histogram Parameters"),
-    radioButtons("histoParam", "Display:",
-                 c("Magnitude vs Cumulative # of Events" = "magvce",
-                   "Magnitude vs Total # of Events" = "magvte",
-                   "Cumulative # of Events vs Time" = "cevt",
-                   "Total # of Events vs Depth" = "tevd"), selected="magvte", inline=TRUE),
+    
+    br(), br(),
+    
+    h4("Set Region"),
+    h6("Manually enter coordinates to display.."),
+    #fluidRow( #column(width=6,
+    h5("Latitude"),
+    numericInput("manlatmin", "Min:", 35.5, min = 35.5, max = 43.5, width='75px'),
+      #),
+    #column(width=6,
+    numericInput("manlatmax", "Max:", 43.5, min = 35.5, max = 43.5, width='75px'),
+    #) #),
+    h5("Longitude"),
+    numericInput("manlonmin", "Min:", -84, min = -84, max = -71, width='75px'),
+    numericInput("manlonmax", "Max:", -71, min = -84, max = -71, width='75px'),
+    
+    br(), br(),
+    
+    conditionalPanel(condition="input.tabs == 'Statistics'", 
+                     h4("Generate Statistics")),
+    conditionalPanel(condition="input.tabs == 'Statistics'",
+                     radioButtons("histoParam", "Select Graph:",
+                                  c("Cumulative Events vs Magnitude" = "magvce",
+                                    "# of Events vs Magnitude" = "magvte",
+                                    "Cumulative Events vs Time" = "cevt",
+                                    "# of Events vs Depth" = "tevd"), selected="magvce", inline=FALSE)),
+    #),
     h4("Filter B")
     #actionButton("decrement_end_year", "End-date -5ys")
-  ),
+  ), #end sidebar panel
+  
+  #), #end fluid row
   
   # Show a plot of the generated distribution
   mainPanel(
@@ -90,8 +115,10 @@ shinyUI(
                    )
                  )
                ),
-      tabPanel("Histogram", plotOutput("histoPlot"))
-    ),
+      tabPanel("Statistics", plotOutput("histoPlot")),
+    id="tabs"
+), #end tab panel definitions
+
     column(10, h3(textOutput("caption")), offset=1)
     )
   ),

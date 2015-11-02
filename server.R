@@ -44,8 +44,26 @@ shinyServer(function(input, output, clientData, session) {
   # Create a reactive text
   text <- reactive({
     plotdata <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2])
+    plotstations <- subset(stations.iris, format(start, "%Y") >= input$bins[1] & 
+                             #format(start, "%Y") <= input$bins[2] & lat >= ranges$latmin & 
+                             #lat <= ranges$latmax & lon <= ranges$lonmax & lon >= ranges$lonmin)
+                             format(start, "%Y") <= input$bins[2] & lat >= 33.5 & 
+                             lat <= 45.5 & lon <= -69 & lon >= -85)
     
-    paste(input$bins[1], '-',input$bins[2], ' => ', nrow(plotdata),' events')
+    #Determine units and correct quantity to insert into caption
+    captionUnit <- function(selectedTab){
+      unit <- " events"
+      if (selectedTab == "Stations Plot"){unit <- " stations" }
+      return(unit)
+    }
+    captionQuant <- function(selectedTab){
+      quant <- nrow(plotdata)
+      if (selectedTab == "Stations Plot"){quant <- nrow(plotstations)}
+      return(quant)
+    }
+    
+    #Formatted caption with proper quant & unit variable values
+    paste(input$bins[1], '-',input$bins[2], ' => ', captionQuant(input$tabs), captionUnit(input$tabs))
   }) 
   
   # Return as text the selected variables
@@ -86,7 +104,7 @@ shinyServer(function(input, output, clientData, session) {
       geom_polygon(aes(long,lat, group=group), fill="palegreen3", colour="grey60", data=county) +
       geom_polygon( data=states, aes(x=long, y=lat, group = group),colour="royalblue4", fill=NA) +
       annotate("rect", xmin=-84, xmax=-71, ymin=35.5, ymax=43.5, colour="black", size=1, fill="blue", alpha="0.01") +
-      geom_point(data=plotstations, size=4, alpha = .7, aes(x=lon, y=lat), color="yellow") +
+      geom_point(data=plotstations, size=4, alpha = .7, aes(x=lon, y=lat), color="yellow", shape=17) +
       #coord_cartesian(xlim = ranges$x, ylim = ranges$y) + #for brush frame
       #geom_point(data=plotdata, size=3, alpha = .7, aes(x=lon, y=lat, color=emw)) +
       #scale_color_gradient(low="blue", high="red") +
@@ -190,16 +208,25 @@ shinyServer(function(input, output, clientData, session) {
   
   output$histoPlot <- renderPlot({
     #For histogram CE
-    plotdata1 <- subset(dataset, format(datetime, "%Y") >= 1800 & format(datetime, "%Y") <= input$bins[2])
+    plotdata1 <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2])
+    # --> CE by mag
+    plotdata1sort <- plotdata1[with(plotdata1, order(emw)), ]
+    plotdata1sort$events <- seq.int(nrow(plotdata1sort))
+    # --> CE by time
+    plotdata1sort2 <- plotdata1[with(plotdata1, order(datetime)), ]
+    plotdata1sort2$events <- seq.int(nrow(plotdata1sort))
+    
     #For histogram TE
     plotdata2 <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2])
     
     selectHisto <- function(histoParam){
       switch(histoParam,
-             magvce = hist(plotdata1$emw, breaks = 8, main = "Magnitude vs Cumulative # of Events", xlab = "Magnitude", col = 'darkgreen', border = 'white'), 
-             magvte = hist(plotdata2$emw, breaks = 8, main = "Magnitude vs # of Events", xlab = "Magnitude", col = 'darkblue', border = 'white'),
-             cevt = hist(plotdata1$datetime, breaks = 8, main = "Cumulative # of Events vs Time", xlab = "Time", col = 'darkred', border = 'white'),
-             tevd = hist(plotdata2$emw, breaks = 8, main = "Total # of Events vs Depth", xlab = "Depth", col = 'darkorange', border = 'white')
+             magvce = plot(plotdata1sort$emw, plotdata1sort$events, type="p", main = "Cumulative # of Events vs Magnitude", xlab = "Magnitude", ylab = "Cumulative Number"),
+             #hist(plotdata1$emw, breaks = 8, main = "Magnitude vs Cumulative # of Events", xlab = "Magnitude", col = 'darkgreen', border = 'white'), 
+             magvte = hist(plotdata2$emw, breaks = 8, main = "# of Events vs Magnitude", xlab="Magnitude", ylab="Events", col = 'darkblue', border = 'white'),
+             cevt = plot(plotdata1sort2$datetime, plotdata1sort2$events, type="p", main = "Cumulative # of Events vs Magnitude", xlab = "Magnitude", ylab = "Cumulative Number"),
+             #hist(plotdata1$datetime, breaks = 8, main = "Cumulative # of Events vs Time", xlab = "Time", ylab="Cumulative Events", col = 'darkred', border = 'white'),
+             tevd = hist(plotdata2$depth, breaks = 8, main = "# of Events vs Depth", xlab = "Depth", col = 'darkorange', border = 'white')
       )
     }
     
