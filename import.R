@@ -39,6 +39,8 @@ colnames(data.small_mag) <- c("eventid", "author", "date","time", "lat","lon", "
 data.small_mag$src <- 'Small_Mag'
 data.small_mag$declustered <- FALSE
 
+data.arrivals <- read.table("data/isc_all_arrivals_no_restriction.txt", header = TRUE, sep = ",")
+data.arrivals$datetime <- strptime(paste0(data.arrivals$DATE, "T", data.arrivals$TIME), format="%Y-%m-%dT%H:%M:%OS")
 
 # Date formatting
   options(digits.secs=3)
@@ -124,5 +126,4 @@ pp <- ggplot() +
 #  geom_abline(intercept = 3, slope = -.45, color = "grey", size = 1)
 
 #d <- dbscan(dataset, 10,showplot = 2)
-
 
