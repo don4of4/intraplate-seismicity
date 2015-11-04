@@ -95,9 +95,4 @@ runApp(".") #automatically
 #  theme(plot.background = element_rect(fill = 'grey')) +
 #  geom_abline(intercept = 3, slope = -.45, color = "grey", size = 1)
 
-<<<<<<< HEAD
-#d <- dbscan(dataset, 10,showplot = 2)
 
-=======
-#d <- dbscan(dataset, 10,showplot = 2)
->>>>>>> 7b992e33804ff975b5a5317ee24c554f4b992ed6
