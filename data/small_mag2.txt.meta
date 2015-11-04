@@ -1,0 +1,13 @@
+Your search parameters are:
+
+  * catalog=ANSS
+  * start_time=1975/01/01,00:00:00
+  * end_time=2013/01/01,00:00:00
+  * minimum_latitude=35.5
+  * maximum_latitude=43.5
+  * minimum_longitude=-84
+  * maximum_longitude=-71
+  * minimum_magnitude=0
+  * maximum_magnitude=2.5
+  * event_type=E
+  * include events with no magnitude 
