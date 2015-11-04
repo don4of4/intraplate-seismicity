@@ -1,15 +1,6 @@
-#install.packages('rgdal')
-#install.packages('ggfortify')
-#install.packages('fossil')
-#install.packages('geosphere')
-#library(WeightedCluster)
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load("mclust","cluster","fossil","geosphere","ggfortify","rgdal")
 
-library(mclust)
-library(cluster) 
-library(fossil)
-library(geosphere)
-library(ggfortify)
-library(rgdal)
 
 #K-Mediods Clustering
 clustering <- dataset

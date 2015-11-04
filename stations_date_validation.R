@@ -1,4 +1,5 @@
-library("dplyr")
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load("dplyr")
 
 # Formatting
 data.arrivals$datetime <- as.POSIXct(data.arrivals$datetime)

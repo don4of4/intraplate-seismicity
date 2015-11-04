@@ -1,19 +1,6 @@
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load("shiny","datasets","ggplot2","scatterplot3d","ks")
 
-# This is the server logic for a Shiny web application.
-# You can find out more about building applications with Shiny here:
-# 
-# http://www.rstudio.com/shiny/
-#
-
-
-library(shiny)
-library(datasets)
-#library(shinyRGL)
-#library(plyr)
-#library(dplyr)
-library(ggplot2)
-library(scatterplot3d)
-library(ks)
 
 shinyServer(function(input, output, clientData, session) {
   
