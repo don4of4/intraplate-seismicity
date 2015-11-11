@@ -1,3 +1,15 @@
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load("proj4")
+
+findDist <- function(x=c(0,0,0), y=c(0,0,0)) {
+  x <- matrix(x/c(180/pi, 180/pi, 1), ncol=3)
+  y <- matrix(y/c(180/pi, 180/pi, 1), ncol=3)
+  xx <- ptransform(x, src.proj="+proj=longlat", dst.proj="+proj=geocent")
+  yy <- ptransform(y, src.proj="+proj=longlat", dst.proj="+proj=geocent")
+  sqrt(sum((yy-xx)^2))
+}
+
+
 # Copied from G-Library
 as_radians = function(theta=0){
   return(theta * pi / 180)

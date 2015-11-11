@@ -11,7 +11,7 @@ colnames(data.anss) <- c("datetime","lat","lon","depth","mag","magtype","nbstati
 data.anss$src <- 'ANSS_2013'
 data.anss$declustered <- FALSE
 
-stations.iris <- read.table("data/out_fetchmdata_sept15", header = FALSE, sep = "|")
+stations.iris <- read.table("data/all_stn_metadata_oct15", header = FALSE, sep = "|")
 colnames(stations.iris) <- c("net","sta","loc","chan","lat","lon","elev","depth","azimuth","dip","instrument","scale","scalefreq","scaleunits","samplerate","start","end")
 data.anss$network <- 'IRIS'
 
@@ -95,9 +95,4 @@ runApp(".") #automatically
 #  theme(plot.background = element_rect(fill = 'grey')) +
 #  geom_abline(intercept = 3, slope = -.45, color = "grey", size = 1)
 
-<<<<<<< HEAD
-#d <- dbscan(dataset, 10,showplot = 2)
 
-=======
-#d <- dbscan(dataset, 10,showplot = 2)
->>>>>>> 7b992e33804ff975b5a5317ee24c554f4b992ed6
