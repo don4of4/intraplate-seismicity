@@ -1,5 +1,5 @@
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load("shiny")
+pacman::p_load("shiny", "rstudioapi")
 
 # This is the user-interface definition of a Shiny web application.
 # You can find out more about building applications with Shiny here:
@@ -73,7 +73,9 @@ shinyUI(
                                   c("Cumulative Events vs Magnitude" = "magvce",
                                     "# of Events vs Magnitude" = "magvte",
                                     "Cumulative Events vs Time" = "cevt",
-                                    "# of Events vs Depth" = "tevd"), selected="magvce", inline=FALSE)),
+                                    "# of Events vs Depth" = "tevd",
+                                    "Stations vs Year" = "svy"),
+                                  selected="magvce", inline=FALSE)),
     #),
     h4("Filter B")
     #actionButton("decrement_end_year", "End-date -5ys")

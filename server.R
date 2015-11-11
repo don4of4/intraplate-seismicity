@@ -32,10 +32,10 @@ shinyServer(function(input, output, clientData, session) {
   text <- reactive({
     plotdata <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2])
     plotstations <- subset(stations.iris, format(start, "%Y") >= input$bins[1] & 
-                             #format(start, "%Y") <= input$bins[2] & lat >= ranges$latmin & 
-                             #lat <= ranges$latmax & lon <= ranges$lonmax & lon >= ranges$lonmin)
                              format(start, "%Y") <= input$bins[2] & lat >= 33.5 & 
                              lat <= 45.5 & lon <= -69 & lon >= -85)
+    deduped.plotstations <- unique( plotstations[2:2] )
+    
     
     #Determine units and correct quantity to insert into caption
     captionUnit <- function(selectedTab){
@@ -45,7 +45,7 @@ shinyServer(function(input, output, clientData, session) {
     }
     captionQuant <- function(selectedTab){
       quant <- nrow(plotdata)
-      if (selectedTab == "Stations Plot"){quant <- nrow(plotstations)}
+      if (selectedTab == "Stations Plot"){quant <- nrow(deduped.plotstations)}
       return(quant)
     }
     
@@ -76,10 +76,9 @@ shinyServer(function(input, output, clientData, session) {
   
   #Zoom features for Plot
   #ranges <- reactiveValues(lon = NULL, lat = NULL)
+  ranges <- reactiveValues(latbrush = NULL, lonbrush = NULL)
   
   output$plot <- renderPlot({
-    
-    #ranges <- reactiveValues(latmin = 33.5, latmax = 45.5, lonmax = -69, lonmin = 85)
     
     plotdata <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2])
     plotstations <- subset(stations.iris, format(start, "%Y") >= input$bins[1] & 
@@ -92,9 +91,9 @@ shinyServer(function(input, output, clientData, session) {
       geom_polygon( data=states, aes(x=long, y=lat, group = group),colour="royalblue4", fill=NA) +
       annotate("rect", xmin=-84, xmax=-71, ymin=35.5, ymax=43.5, colour="black", size=1, fill="blue", alpha="0.01") +
       geom_point(data=plotstations, size=4, alpha = .7, aes(x=lon, y=lat), color="yellow", shape=17) +
-      #coord_cartesian(xlim = ranges$x, ylim = ranges$y) + #for brush frame
-      #geom_point(data=plotdata, size=3, alpha = .7, aes(x=lon, y=lat, color=emw)) +
-      #scale_color_gradient(low="blue", high="red") +
+      coord_cartesian(xlim = ranges$latbrush, ylim = ranges$lonbrush) + #for brush frame (was out)
+      #geom_point(data=plotdata, size=3, alpha = .7, aes(x=lon, y=lat, color=emw)) + #was out
+      #scale_color_gradient(low="blue", high="red") + #was out
       theme(plot.background = element_rect(fill = 'grey')) +
       geom_abline(intercept = 3, slope = -.45, color = "grey", size = 1)
     
@@ -106,7 +105,10 @@ shinyServer(function(input, output, clientData, session) {
   # When a double-click happens, check if there's a brush on the plot.
   # If so, zoom to the brush bounds; if not, reset the zoom.
   observeEvent(input$plot_dblclick, {
+    print("DOUBLE CLICK IS REGISTERING") #test line
     brush <- input$plot_brush
+    print("Selected coords:", brush$xmin, brush$xmax) #test line
+    print(brush$xmin) #test line
     if (!is.null(brush)) {
       #plotstations <- subset(stations.iris, format(start, "%Y") >= input$bins[1] & 
                                #format(start, "%Y") <= input$bins[2] & lat >= latmin & 
@@ -123,13 +125,13 @@ shinyServer(function(input, output, clientData, session) {
       
       #test.data <- plotstationsZoom
       
-      #ranges$x <- c(brush$xmin, brush$xmax)
-      #ranges$y <- c(brush$ymin, brush$ymax)
+      ranges$latbrush <- c(brush$xmin, brush$xmax)
+      ranges$lonbrush <- c(brush$ymin, brush$ymax)
       
       
     } else {
-      ranges$x <- NULL
-      ranges$y <- NULL
+      ranges$latbrush <- NULL
+      ranges$lonbrush <- NULL
     }
   })
   
@@ -206,14 +208,32 @@ shinyServer(function(input, output, clientData, session) {
     #For histogram TE
     plotdata2 <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2])
     
+    #For stations/year graph
+    plotstations <- subset(stations.iris, format(start, "%Y") >= input$bins[1] &
+                             format(start, "%Y") <= input$bins[2] & lat >= 33.5 & 
+                             lat <= 45.5 & lon <= -69 & lon >= -85)
+    df <- plotstations[,c('sta','start')]
+    df$start <- as.Date(df$start, "%Y")
+    #df2 <- subset(df,format(start, "%Y"))
+    deduped2.plotstations <- subset(df, !duplicated(df[,1]))
+    
+    #plotdata <- subset(dataset, format(datetime, "%Y") >= 1800 & format(datetime, "%Y") <= 2015)
+    #plotstations <- subset(stations.iris, format(start, "%Y") >= 1800 & 
+    #                         format(start, "%Y") <= 2015 & lat >= 33.5 & 
+    #                         lat <= 45.5 & lon <= -69 & lon >= -85)
+    #df <- plotstations[,c('sta','start')]
+    #deduped.plotstations <- unique( df[1:2] )
+    
     selectHisto <- function(histoParam){
       switch(histoParam,
-             magvce = plot(plotdata1sort$emw, plotdata1sort$events, type="p", main = "Cumulative # of Events vs Magnitude", xlab = "Magnitude", ylab = "Cumulative Number"),
+             magvce = plot(plotdata1sort$emw, plotdata1sort$events, type="p", main = "Cumulative # of Events vs Magnitude", xlab = "Magnitude", ylab = "Cumulative Number", xlim = rev(range(plotdata1sort$emw))),
              #hist(plotdata1$emw, breaks = 8, main = "Magnitude vs Cumulative # of Events", xlab = "Magnitude", col = 'darkgreen', border = 'white'), 
              magvte = hist(plotdata2$emw, breaks = 8, main = "# of Events vs Magnitude", xlab="Magnitude", ylab="Events", col = 'darkblue', border = 'white'),
              cevt = plot(plotdata1sort2$datetime, plotdata1sort2$events, type="p", main = "Cumulative # of Events vs Magnitude", xlab = "Magnitude", ylab = "Cumulative Number"),
              #hist(plotdata1$datetime, breaks = 8, main = "Cumulative # of Events vs Time", xlab = "Time", ylab="Cumulative Events", col = 'darkred', border = 'white'),
-             tevd = hist(plotdata2$depth, breaks = 8, main = "# of Events vs Depth", xlab = "Depth", col = 'darkorange', border = 'white')
+             tevd = hist(plotdata2$depth, breaks = 8, main = "# of Events vs Depth", xlab = "Depth", col = 'darkorange', border = 'white'),
+             magvte = hist(deduped2.plotstations$start, breaks = 10, main = "Stations Per Year", xlab="Year", ylab="Stations", col = 'yellow', border = 'white')
+             #svy = plot(deduped2.plotstations$start, deduped2.plotstations$sta, type="p", main = "Stations vs Year", xlab = "Year", ylab = "Stations")
       )
     }
     
@@ -236,6 +256,7 @@ output$tplot <- renderPlot({
 # When a double-click happens, check if there's a brush on the plot.
 # If so, zoom to the brush bounds; if not, reset the zoom.
 observeEvent(input$tplot_dblclick, {
+  #print("hello")
   brush <- input$tplot_brush
   if (!is.null(brush)) {
     ranges$x <- c(brush$xmin, brush$xmax)
