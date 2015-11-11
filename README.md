@@ -17,15 +17,20 @@ Magnitude conversions where requred on data from ANSS_2013.  This was the method
 ####Filtering Parameters Used:
  - Todo
  
-####Installation:
+####Installation & Setup
  - Download and install R
  - Download and install RStudio
- - If mac:  download and install XQuartz
+ - If Mac:  Download and install XQuartz
+ -          Dpen Terminal
+ -          Type 'git clone https://github.com/don4of4/intraplate-seismicity.git' without the parentheses
+ -          enter Github User and Password
 
 ####Execution:
- - Run the entire import.r script.  Select all, then press ctrl-enter.  R may ask you to install packages: press yes.
- - Click Run App in the ui.r file.
- 
+ - Open RStudio
+ - File/Open File...
+ - Navigate to Don.Rproj in the intraplate-seismicity folder (just added via Github)
+ - Within RStudio, under Files, click import.R, highlight the entire contents of the file, and press Run
+ - If needed, open server.R and press Run App
  
 ####Troubleshooting:
 
