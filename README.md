@@ -26,3 +26,8 @@ Magnitude conversions where requred on data from ANSS_2013.  This was the method
  - Run the entire import.r script.  Select all, then press ctrl-enter.  R may ask you to install packages: press yes.
  - Click Run App in the ui.r file.
  
+ 
+####Troubleshooting:
+
+#####Error: There is no package called ShinyRGL.
+This error is indicative that XQuartz is not installed on mac.  If you just installed it, restart your R session.  You should not recieve this error on PC.
