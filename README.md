@@ -17,3 +17,12 @@ Magnitude conversions where requred on data from ANSS_2013.  This was the method
 ####Filtering Parameters Used:
  - Todo
  
+####Installation:
+ - Download and install R
+ - Download and install RStudio
+ - If mac:  download and install XQuartz
+
+####Execution:
+ - Run the entire import.r script.  Select all, then press ctrl-enter.  R may ask you to install packages: press yes.
+ - Click Run App in the ui.r file.
+ 
