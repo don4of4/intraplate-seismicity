@@ -89,9 +89,7 @@ shinyUI(
     #  Latitude = c(-84,-71)
     #),
     tabsetPanel(
-#<<<<<<< HEAD
-    
-#=======
+
       tabPanel("Stations Plot",
                plotOutput(
                  "plot",

@@ -32,8 +32,6 @@ shinyServer(function(input, output, clientData, session) {
   text <- reactive({
     plotdata <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2])
     plotstations <- subset(stations.iris, format(start, "%Y") >= input$bins[1] & 
-                             #format(start, "%Y") <= input$bins[2] & lat >= ranges$latmin & 
-                             #lat <= ranges$latmax & lon <= ranges$lonmax & lon >= ranges$lonmin)
                              format(start, "%Y") <= input$bins[2] & lat >= 33.5 & 
                              lat <= 45.5 & lon <= -69 & lon >= -85)
     

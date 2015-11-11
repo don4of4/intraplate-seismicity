@@ -25,3 +25,5 @@ badstarts <- subset(result, result$first_sta_arrival > result$start)
 
 # Find all stations where the end date must be incorrect
 badstarts <- subset(result, result$last_sta_arrival > result$end)
+
+
