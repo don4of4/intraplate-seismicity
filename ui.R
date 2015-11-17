@@ -77,7 +77,11 @@ shinyUI(
                                     "Stations vs Year" = "svy"),
                                   selected="magvce", inline=FALSE)),
     #),
-    h4("Filter B")
+    h4("Download Data"),
+    selectInput("downloadset", "Choose a dataset:", 
+                choices = c("stations", "earthquakes")),
+    downloadButton('downloadData', 'Download')
+    
     #actionButton("decrement_end_year", "End-date -5ys")
   ), #end sidebar panel
   

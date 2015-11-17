@@ -77,7 +77,8 @@ shinyServer(function(input, output, clientData, session) {
   #Zoom features for Plot
   #ranges <- reactiveValues(lon = NULL, lat = NULL)
   ranges <- reactiveValues(latbrush = NULL, lonbrush = NULL)
-  
+
+
   output$plot <- renderPlot({
     
     plotdata <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2])
@@ -98,6 +99,23 @@ shinyServer(function(input, output, clientData, session) {
       geom_abline(intercept = 3, slope = -.45, color = "grey", size = 1)
     
     print(pp)
+    ## Download ##
+    datasetInput <- reactive({
+      switch(input$downloadset,
+             "stations" = plotstations,
+             "earthquakes" = plotdata)
+    })
+    
+    output$table <- renderTable({
+      datasetInput()
+    })
+    
+    output$downloadData <- downloadHandler(
+      filename = function() { paste('output.csv', sep='') },
+      content = function(file) {
+        write.csv(datasetInput(), file)
+      }
+    )
   })
   
   #ranges <- reactiveValues(x = NULL, y = NULL)
