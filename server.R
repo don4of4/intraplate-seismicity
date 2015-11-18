@@ -199,7 +199,7 @@ shinyServer(function(input, output, clientData, session) {
     #For histogram CE
     plotdata1 <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2])
     # --> CE by mag
-    plotdata1sort <- plotdata1[with(plotdata1, order(emw)), ]
+    plotdata1sort <- plotdata1[with(plotdata1, order(-emw)), ]
     plotdata1sort$events <- seq.int(nrow(plotdata1sort))
     # --> CE by time
     plotdata1sort2 <- plotdata1[with(plotdata1, order(datetime)), ]
@@ -207,6 +207,10 @@ shinyServer(function(input, output, clientData, session) {
     
     #For histogram TE
     plotdata2 <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2])
+    
+    #For histogram Depth
+    #df3 <- plotdata2[,c('depth')]
+    #plotdata3 <- subset(df3, !duplicated(df3[,1]))
     
     #For stations/year graph
     plotstations <- subset(stations.iris, format(start, "%Y") >= input$bins[1] &
@@ -226,13 +230,13 @@ shinyServer(function(input, output, clientData, session) {
     
     selectHisto <- function(histoParam){
       switch(histoParam,
-             magvce = plot(plotdata1sort$emw, plotdata1sort$events, type="p", main = "Cumulative # of Events vs Magnitude", xlab = "Magnitude", ylab = "Cumulative Number", xlim = rev(range(plotdata1sort$emw))),
+             magvce = plot(plotdata1sort$emw, plotdata1sort$events, type="p", main = "Cumulative # of Events vs Magnitude", xlab = "Magnitude", ylab = "Cumulative Number"),
              #hist(plotdata1$emw, breaks = 8, main = "Magnitude vs Cumulative # of Events", xlab = "Magnitude", col = 'darkgreen', border = 'white'), 
              magvte = hist(plotdata2$emw, breaks = 8, main = "# of Events vs Magnitude", xlab="Magnitude", ylab="Events", col = 'darkblue', border = 'white'),
              cevt = plot(plotdata1sort2$datetime, plotdata1sort2$events, type="p", main = "Cumulative # of Events vs Magnitude", xlab = "Magnitude", ylab = "Cumulative Number"),
              #hist(plotdata1$datetime, breaks = 8, main = "Cumulative # of Events vs Time", xlab = "Time", ylab="Cumulative Events", col = 'darkred', border = 'white'),
-             tevd = hist(plotdata2$depth, breaks = 8, main = "# of Events vs Depth", xlab = "Depth", col = 'darkorange', border = 'white'),
-             magvte = hist(deduped2.plotstations$start, breaks = 10, main = "Stations Per Year", xlab="Year", ylab="Stations", col = 'yellow', border = 'white')
+             tevd = hist(plotdata2$depth, breaks = 30, main = "# of Events vs Depth", xlab = "Depth", col = 'darkorange', border = 'white'),
+             svy = hist(deduped2.plotstations$start, breaks = 10, main = "Stations Per Year", xlab="Year", ylab="Stations", col = 'yellow', border = 'white')
              #svy = plot(deduped2.plotstations$start, deduped2.plotstations$sta, type="p", main = "Stations vs Year", xlab = "Year", ylab = "Stations")
       )
     }
@@ -245,7 +249,7 @@ shinyServer(function(input, output, clientData, session) {
 ##TEST PLOT##
 
 # Single zoomable plot (on left)
-ranges <- reactiveValues(x = NULL, y = NULL)
+ranges2 <- reactiveValues(x = NULL, y = NULL)
 
 output$tplot <- renderPlot({
   ggplot(mtcars, aes(wt, mpg)) +
@@ -259,12 +263,12 @@ observeEvent(input$tplot_dblclick, {
   #print("hello")
   brush <- input$tplot_brush
   if (!is.null(brush)) {
-    ranges$x <- c(brush$xmin, brush$xmax)
-    ranges$y <- c(brush$ymin, brush$ymax)
+    ranges2$x <- c(brush$xmin, brush$xmax)
+    ranges2$y <- c(brush$ymin, brush$ymax)
     
   } else {
-    ranges$x <- NULL
-    ranges$y <- NULL
+    ranges2$x <- NULL
+    ranges2$y <- NULL
   }
   })
 
