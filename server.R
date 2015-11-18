@@ -4,30 +4,6 @@ pacman::p_load("shiny","datasets","ggplot2","scatterplot3d","ks")
 
 shinyServer(function(input, output, clientData, session) {
   
-  #plotdata <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2])
-  
-  #Download handler for CSV download button
-  #   output$downloadCSV <- downloadHandler(
-  #     filename = function(){
-  #       paste('data_', input$bins[1], '-',input$bins[2], '.csv', sep = '')
-  #     }, 
-  #     content = function(file) {
-  #       write.csv(plotdata, file)
-  #       }, 
-  #     contentType = 'text/csv'
-  #     )
-  #   
-  #   #Download handler for png download button
-  #   output$downloadPNG <- downloadHandler(
-  #     filename = function(){
-  #       paste('data_', input$bins[1], '-',input$bins[2], '.png', sep = '')
-  #     }, 
-  #     content = function(file) {
-  #       write.csv(plotdata, file)
-  #     }, 
-  #     contentType = 'image/png'
-  #   )
-  
   # Create a reactive text
   text <- reactive({
     plotdata <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2])
@@ -40,7 +16,7 @@ shinyServer(function(input, output, clientData, session) {
     #Determine units and correct quantity to insert into caption
     captionUnit <- function(selectedTab){
       unit <- " events"
-      if (selectedTab == "Stations Plot"){unit <- " stations" }
+      if (selectedTab == "Stations Plot" ){unit <- " stations" }
       return(unit)
     }
     captionQuant <- function(selectedTab){
@@ -49,12 +25,12 @@ shinyServer(function(input, output, clientData, session) {
       return(quant)
     }
     
+    
     #Formatted caption with proper quant & unit variable values
     paste(input$bins[1], '-',input$bins[2], ' => ', captionQuant(input$tabs), captionUnit(input$tabs))
   }) 
   
   # Return as text the selected variables
-  #TODO: Accurately render each date
   output$caption <- renderText({
     text()
   })
@@ -205,39 +181,29 @@ shinyServer(function(input, output, clientData, session) {
     plotdata1sort2 <- plotdata1[with(plotdata1, order(datetime)), ]
     plotdata1sort2$events <- seq.int(nrow(plotdata1sort))
     
-    #For histogram TE
+    #For histogram TE vs depth & Mag vs TE
     plotdata2 <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2])
     
-    #For histogram Depth
-    #df3 <- plotdata2[,c('depth')]
-    #plotdata3 <- subset(df3, !duplicated(df3[,1]))
-    
     #For stations/year graph
-    plotstations <- subset(stations.iris, format(start, "%Y") >= input$bins[1] &
-                             format(start, "%Y") <= input$bins[2] & lat >= 33.5 & 
-                             lat <= 45.5 & lon <= -69 & lon >= -85)
+    plotstations <- subset(stations.iris, 
+                             format(start, "%Y") >= input$bins[1]
+                             & format(start, "%Y") <= input$bins[2]
+                             #& format(end, "%Y") >= input$bins[1]
+                             & format(end, "%Y") >= input$bins[2]
+                             & lat >= 33.5 & lat <= 45.5 
+                             & lon <= -69 & lon >= -85)
     df <- plotstations[,c('sta','start')]
     df$start <- as.Date(df$start, "%Y")
     #df2 <- subset(df,format(start, "%Y"))
     deduped2.plotstations <- subset(df, !duplicated(df[,1]))
     
-    #plotdata <- subset(dataset, format(datetime, "%Y") >= 1800 & format(datetime, "%Y") <= 2015)
-    #plotstations <- subset(stations.iris, format(start, "%Y") >= 1800 & 
-    #                         format(start, "%Y") <= 2015 & lat >= 33.5 & 
-    #                         lat <= 45.5 & lon <= -69 & lon >= -85)
-    #df <- plotstations[,c('sta','start')]
-    #deduped.plotstations <- unique( df[1:2] )
-    
     selectHisto <- function(histoParam){
       switch(histoParam,
              magvce = plot(plotdata1sort$emw, plotdata1sort$events, type="p", main = "Cumulative # of Events vs Magnitude", xlab = "Magnitude", ylab = "Cumulative Number"),
-             #hist(plotdata1$emw, breaks = 8, main = "Magnitude vs Cumulative # of Events", xlab = "Magnitude", col = 'darkgreen', border = 'white'), 
-             magvte = hist(plotdata2$emw, breaks = 8, main = "# of Events vs Magnitude", xlab="Magnitude", ylab="Events", col = 'darkblue', border = 'white'),
+             magvte = hist(plotdata2$emw, breaks = 8, main = "# of Events vs Magnitude", xlab="Magnitude", ylab="Events", col = 'darkblue', border='white'),
              cevt = plot(plotdata1sort2$datetime, plotdata1sort2$events, type="p", main = "Cumulative # of Events vs Magnitude", xlab = "Magnitude", ylab = "Cumulative Number"),
-             #hist(plotdata1$datetime, breaks = 8, main = "Cumulative # of Events vs Time", xlab = "Time", ylab="Cumulative Events", col = 'darkred', border = 'white'),
-             tevd = hist(plotdata2$depth, breaks = 30, main = "# of Events vs Depth", xlab = "Depth", col = 'darkorange', border = 'white'),
-             svy = hist(deduped2.plotstations$start, breaks = 10, main = "Stations Per Year", xlab="Year", ylab="Stations", col = 'yellow', border = 'white')
-             #svy = plot(deduped2.plotstations$start, deduped2.plotstations$sta, type="p", main = "Stations vs Year", xlab = "Year", ylab = "Stations")
+             tevd = hist(plotdata2$depth, breaks = 30, main = "# of Events vs Depth", xlab = "Depth", col = 'darkorange', border='white'),
+             svy = hist(deduped2.plotstations$start, breaks = 10, main = "Stations Per Year", xlab="Year", ylab="Stations", col = 'yellow', border='white') #ylim=c(0,400),
       )
     }
     

@@ -127,15 +127,6 @@ shinyUI(
     )
   ),
   
-  #Download Panel
-  fluidRow(
-     wellPanel(
-#       #For downloading CSV textual output
-#       downloadButton(downloadCSV, label = "Download Data as CSV", class = NULL),
-#       #For downloading png visual output
-#       downloadButton(downloadPNG, label = "Download Plots as Image", class = NULL)
-     )
-  )
   
   )
 )
