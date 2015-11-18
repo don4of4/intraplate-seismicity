@@ -50,7 +50,7 @@ shinyServer(function(input, output, clientData, session) {
     }
     
     #Formatted caption with proper quant & unit variable values
-    paste(input$bins[1], '-',input$bins[2], ' => ', captionQuant(input$tabs), captionUnit(input$tabs))
+    paste(input$bins[1], '-',input$bins[2], ' <=> ', captionQuant(input$tabs), captionUnit(input$tabs))
   }) 
   
   # Return as text the selected variables
@@ -77,8 +77,8 @@ shinyServer(function(input, output, clientData, session) {
   #Zoom features for Plot
   #ranges <- reactiveValues(lon = NULL, lat = NULL)
   ranges <- reactiveValues(latbrush = NULL, lonbrush = NULL)
-
-
+  
+  
   output$plot <- renderPlot({
     
     plotdata <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2])
@@ -129,8 +129,8 @@ shinyServer(function(input, output, clientData, session) {
     print(brush$xmin) #test line
     if (!is.null(brush)) {
       #plotstations <- subset(stations.iris, format(start, "%Y") >= input$bins[1] & 
-                               #format(start, "%Y") <= input$bins[2] & lat >= latmin & 
-                               #lat <= latmax & lon <= lonmax & lon >= lonmin)
+      #format(start, "%Y") <= input$bins[2] & lat >= latmin & 
+      #lat <= latmax & lon <= lonmax & lon >= lonmin)
       #                        format(start, "%Y") <= input$bins[2] & lat >= 40 & 
       #                       lat <= 45.5 & lon <= -80 & lon >= -85)
       #format(start, "%Y") <= input$bins[2] & lat >= 35 & lat <= 40 & lon <= -75 & lon >= -80
@@ -156,33 +156,31 @@ shinyServer(function(input, output, clientData, session) {
   #Earthquakes Plot:
   
   output$plot2 <- renderPlot({
-      plotdata <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2])
-      
-      pp <- ggplot() +
-        geom_polygon(aes(long,lat, group=group), fill="palegreen3", colour="grey60", data=county) +
-        geom_polygon( data=states, aes(x=long, y=lat, group = group),colour="royalblue4", fill=NA) +
-        annotate("rect", xmin=-84, xmax=-71, ymin=35.5, ymax=43.5, colour="black", size=1, fill="blue", alpha="0.01") +
-        geom_point(size=2, alpha = .7, aes(dataset$lon, dataset$lat, color=dataset$emw)) +
-        scale_color_gradient(low="blue", high="red") +
-        theme(plot.background = element_rect(fill = 'grey')) +
-        geom_abline(intercept = 3, slope = -.45, color = "grey", size = 1)
-      
-      print(pp)
-  })
+    plotdata <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2])
     
+    pp <- ggplot() +
+      geom_polygon(aes(long,lat, group=group), fill="palegreen3", colour="grey60", data=county) +
+      geom_polygon( data=states, aes(x=long, y=lat, group = group),colour="royalblue4", fill=NA) +
+      annotate("rect", xmin=-84, xmax=-71, ymin=35.5, ymax=43.5, colour="black", size=1, fill="blue", alpha="0.01") +
+      geom_point(size=2, alpha = .7, aes(dataset$lon, dataset$lat, color=dataset$emw)) +
+      scale_color_gradient(low="blue", high="red") +
+      theme(plot.background = element_rect(fill = 'grey')) +
+      geom_abline(intercept = 3, slope = -.45, color = "grey", size = 1)
+    
+    print(pp)
+  })
+  
   
   output$plot4 <- renderPlot({
     plotdata <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2])
     coordinates=with(plotdata,data.frame(long=lon,lat=lat,depth=depth))
     calc_coordinates=with(plotdata,data.frame(long=lon*100,lat=lat*100,depth=depth))
-    model=dbscan(calc_coordinates,MinPts=25,eps=43)
+    model=dbscan(calc_coordinates,MinPts=input$minPts,eps=input$eps)
     clusters=predict(model,calc_coordinates)+1
     with(coordinates,scatterplot3d(x=long,y=lat,z=-depth,color=clusters))
     
   })
   
-  #install.packages("ks")
-  library(ks)
   output$plot5 <- renderPlot({
     plotdata <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2])
     calc_coordinates=with(plotdata,data.frame(long=lon*100,lat=lat*100,depth=-depth))
@@ -192,7 +190,7 @@ shinyServer(function(input, output, clientData, session) {
     
   })
   
-
+  
   #Histogram Plot
   
   output$histoPlot <- renderPlot({
@@ -241,33 +239,33 @@ shinyServer(function(input, output, clientData, session) {
     
   })
   
-
-##TEST PLOT##
-
-# Single zoomable plot (on left)
-ranges <- reactiveValues(x = NULL, y = NULL)
-
-output$tplot <- renderPlot({
-  ggplot(mtcars, aes(wt, mpg)) +
-    geom_point() +
-    coord_cartesian(xlim = ranges$x, ylim = ranges$y)
-})
-
-# When a double-click happens, check if there's a brush on the plot.
-# If so, zoom to the brush bounds; if not, reset the zoom.
-observeEvent(input$tplot_dblclick, {
-  #print("hello")
-  brush <- input$tplot_brush
-  if (!is.null(brush)) {
-    ranges$x <- c(brush$xmin, brush$xmax)
-    ranges$y <- c(brush$ymin, brush$ymax)
-    
-  } else {
-    ranges$x <- NULL
-    ranges$y <- NULL
-  }
+  
+  ##TEST PLOT##
+  
+  # Single zoomable plot (on left)
+  ranges <- reactiveValues(x = NULL, y = NULL)
+  
+  output$tplot <- renderPlot({
+    ggplot(mtcars, aes(wt, mpg)) +
+      geom_point() +
+      coord_cartesian(xlim = ranges$x, ylim = ranges$y)
   })
-
-#END TEST PLOT FUNCTIONS
-
+  
+  # When a double-click happens, check if there's a brush on the plot.
+  # If so, zoom to the brush bounds; if not, reset the zoom.
+  observeEvent(input$tplot_dblclick, {
+    #print("hello")
+    brush <- input$tplot_brush
+    if (!is.null(brush)) {
+      ranges$x <- c(brush$xmin, brush$xmax)
+      ranges$y <- c(brush$ymin, brush$ymax)
+      
+    } else {
+      ranges$x <- NULL
+      ranges$y <- NULL
+    }
+  })
+  
+  #END TEST PLOT FUNCTIONS
+  
 })
