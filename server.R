@@ -77,7 +77,8 @@ shinyServer(function(input, output, clientData, session) {
   #Zoom features for Plot
   #ranges <- reactiveValues(lon = NULL, lat = NULL)
   ranges <- reactiveValues(latbrush = NULL, lonbrush = NULL)
-  
+
+
   output$plot <- renderPlot({
     
     plotdata <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2])
@@ -98,6 +99,23 @@ shinyServer(function(input, output, clientData, session) {
       geom_abline(intercept = 3, slope = -.45, color = "grey", size = 1)
     
     print(pp)
+    ## Download ##
+    datasetInput <- reactive({
+      switch(input$downloadset,
+             "stations" = plotstations,
+             "earthquakes" = plotdata)
+    })
+    
+    output$table <- renderTable({
+      datasetInput()
+    })
+    
+    output$downloadData <- downloadHandler(
+      filename = function() { paste('output.csv', sep='') },
+      content = function(file) {
+        write.csv(datasetInput(), file)
+      }
+    )
   })
   
   #ranges <- reactiveValues(x = NULL, y = NULL)
@@ -152,24 +170,6 @@ shinyServer(function(input, output, clientData, session) {
       print(pp)
   })
     
-  #K-Meds Plot:
-  
-  output$plot3 <- renderPlot({
-    
-    plotdata <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2])
-    coordinates=with(plotdata,data.frame(long=lon,lat=lat,depth=depth))
-    calc_coordinates=with(plotdata,data.frame(long=lon*100,lat=lat*100,depth=log1p(depth)))
-    
-    # Do K-med 
-    #dist  <- earth.dist(coordinates, dist=T)
-    # Here the distance is still calculated in 2D, i.e. does not use the depth
-    distm  <- dist(calc_coordinates)
-    #clust_result=pam(distm,5)
-    clustering=pam(distm,pamk(calc_coordinates,criterion="multiasw",usepam=FALSE)$nc,cluster.only=TRUE)
-    # Graph it.
-    with(plotdata,scatterplot3d(x=lon,y=lat,z=-depth,color=clustering))
-    
-  })
   
   output$plot4 <- renderPlot({
     plotdata <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2])

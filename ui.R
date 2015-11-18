@@ -77,7 +77,11 @@ shinyUI(
                                     "Stations vs Year" = "svy"),
                                   selected="magvce", inline=FALSE)),
     #),
-    h4("Filter B")
+    h4("Download Data"),
+    selectInput("downloadset", "Choose a dataset:", 
+                choices = c("stations", "earthquakes")),
+    downloadButton('downloadData', 'Download')
+    
     #actionButton("decrement_end_year", "End-date -5ys")
   ), #end sidebar panel
   
@@ -103,7 +107,6 @@ shinyUI(
                  )
                ),
       tabPanel("Eathquakes Plot", plotOutput("plot2")),
-      tabPanel("K-Medoids Plot", plotOutput("plot3")),
       tabPanel("Density Plot (dbscan)", plotOutput("plot4")),
       tabPanel("New plot", plotOutput("plot5")),
       tabPanel("Test Plot",
