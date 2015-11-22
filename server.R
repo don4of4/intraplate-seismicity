@@ -14,20 +14,20 @@ shinyServer(function(input, output, clientData, session) {
     
     
     #Determine units and correct quantity to insert into caption
-    captionUnit <- function(selectedTab){
+    captionUnit <- function(selectedTab, histo){
       unit <- " events"
-      if (selectedTab == "Stations Plot" ){unit <- " stations" }
+      if (selectedTab == "Stations Plot" || ( selectedTab == "Statistics" & histo == 'svy')){unit <- " stations" }
       return(unit)
     }
-    captionQuant <- function(selectedTab){
+    captionQuant <- function(selectedTab, histo){
       quant <- nrow(plotdata)
-      if (selectedTab == "Stations Plot"){quant <- nrow(deduped.plotstations)}
+      if (selectedTab == "Stations Plot" || ( selectedTab == "Statistics" & histo == 'svy')){quant <- nrow(deduped.plotstations)}
       return(quant)
     }
     
     
     #Formatted caption with proper quant & unit variable values
-    paste(input$bins[1], '-',input$bins[2], ' => ', captionQuant(input$tabs), captionUnit(input$tabs))
+    paste(input$bins[1], '-',input$bins[2], ' <=> ', captionQuant(input$tabs, input$histoParam), captionUnit(input$tabs, input$histoParam))
   }) 
   
   # Return as text the selected variables
@@ -200,8 +200,8 @@ shinyServer(function(input, output, clientData, session) {
              magvce = plot(plotdata1sort$emw, plotdata1sort$events, type="p", main = "Cumulative # of Events vs Magnitude", xlab = "Magnitude", ylab = "Cumulative Number"),
              magvte = hist(plotdata2$emw, breaks = 8, main = "# of Events vs Magnitude", xlab="Magnitude", ylab="Events", col = 'darkblue', border='white'),
              cevt = plot(plotdata1sort2$datetime, plotdata1sort2$events, type="p", main = "Cumulative # of Events vs Magnitude", xlab = "Magnitude", ylab = "Cumulative Number"),
-             tevd = hist(plotdata2$depth, breaks = 30, main = "# of Events vs Depth", xlab = "Depth", col = 'darkorange', border='white'),
-             svy = hist(deduped2.plotstations$start, breaks = 10, main = "Stations Per Year", xlab="Year", ylab="Stations", col = 'yellow', border='white') #ylim=c(0,400),
+             tevd = hist(plotdata2$depth, breaks = 20, main = "# of Events vs Depth", xlab = "Depth", col = 'darkorange', border='white'),
+             svy = hist(deduped2.plotstations$start, breaks = 20, main = "Stations Per Year", xlab="Year", ylab="Stations", col = 'yellow', border='white') #ylim=c(0,400),
       )
     }
     
