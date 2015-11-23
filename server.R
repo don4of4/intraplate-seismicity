@@ -1,5 +1,9 @@
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load("shiny","datasets","ggplot2","scatterplot3d","ks")
+install.packages('lubridate')
+#install.packages('dplyr')
+library(lubridate)
+library(dplyr)
 
 
 shinyServer(function(input, output, clientData, session) {
@@ -183,6 +187,7 @@ shinyServer(function(input, output, clientData, session) {
     plotdata2 <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2])
     
     #For stations/year graph
+    #-> grads stations within the geo boundaries, that are active
     plotstations <- subset(stations.iris, 
                              format(start, "%Y") >= input$bins[1]
                              & format(start, "%Y") <= input$bins[2]
@@ -190,10 +195,22 @@ shinyServer(function(input, output, clientData, session) {
                              & format(end, "%Y") >= input$bins[2]
                              & lat >= 33.5 & lat <= 45.5 
                              & lon <= -69 & lon >= -85)
-    df <- plotstations[,c('sta','start')]
+    #-> creates a dataframe with formatted station, start and end, without duplicates
+    df <- plotstations[,c('sta','start', 'end')]
     df$start <- as.Date(df$start, "%Y")
-    #df2 <- subset(df,format(start, "%Y"))
-    deduped2.plotstations <- subset(df, !duplicated(df[,1]))
+    df$end <- as.Date(df$end, "%Y")
+    
+    mutate_each(df, funs(year(.)), start:end) -> temp
+    #DON LOOK HERE ^ and below
+    active <- sapply(1:nrow(temp), function(x){
+      seq(temp[x, 2], temp[x, 3], by = 1)}) %>%
+      unlist %>%
+      table %>%
+      data.frame
+    
+    #activeSta$Freq used to determine active stations for given year
+    
+    activeSta <- subset(active, . >= input$bins[1] & . <= input$bins[2] )
     
     selectHisto <- function(histoParam){
       switch(histoParam,
@@ -201,12 +218,14 @@ shinyServer(function(input, output, clientData, session) {
              magvte = hist(plotdata2$emw, breaks = 8, main = "# of Events vs Magnitude", xlab="Magnitude", ylab="Events", col = 'darkblue', border='white'),
              cevt = plot(plotdata1sort2$datetime, plotdata1sort2$events, type="p", main = "Cumulative # of Events vs Magnitude", xlab = "Magnitude", ylab = "Cumulative Number"),
              tevd = hist(plotdata2$depth, breaks = 20, main = "# of Events vs Depth", xlab = "Depth", col = 'darkorange', border='white'),
-             svy = hist(deduped2.plotstations$start, breaks = 20, main = "Stations Per Year", xlab="Year", ylab="Stations", col = 'yellow', border='white') #ylim=c(0,400),
+             svy = barplot(activeSta$Freq, names.arg = activeSta$.) 
+               #hist(activeSta$., breaks = 20, main = "Stations Per Year", xlab="Year", ylab="Stations", col = 'yellow', border='white') #ylim=c(0,400),
       )
     }
     
     selectHisto(input$histoParam)
-    
+   
+     
   })
   
   
