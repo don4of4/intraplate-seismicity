@@ -182,6 +182,17 @@ shinyServer(function(input, output, clientData, session) {
     # --> CE by time
     plotdata1sort2 <- plotdata1[with(plotdata1, order(datetime)), ]
     plotdata1sort2$events <- seq.int(nrow(plotdata1sort))
+    #--> For log scaling
+    #ticks <- seq(-2, 2, by=1)
+    #labels <- sapply(ticks, function(i) as.expression(bquote(10^ .(i))))
+    #axis(1, at=c(0.01, 0.1, 1, 10, 100), labels=labels)
+     
+#     logPlotMag <- function(){
+#       plot(plotdata1sort$emw, plotdata1sort$events, type="p", main = "Cumulative # of Events vs Magnitude", xlab = "Magnitude", ylab = "Cumulative Number", log="y")
+#       #ticks <- axTicks(2) #seq(0, 6, by=1)
+#       labels <- sapply(axTicks(2), function(i) as.expression(bquote(10^ .(i))))
+#       axis(2, at=axTicks(2), labels=labels) #at=c(0, 0.01, 0.1, 1, 10, 100, 1000)
+#     }
     
     #For histogram TE vs depth & Mag vs TE
     plotdata2 <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2])
@@ -207,16 +218,17 @@ shinyServer(function(input, output, clientData, session) {
       unlist %>%
       table %>%
       data.frame
-    
+  
     #activeSta$Freq used to determine active stations for given year
     
     activeSta <- subset(active, . >= input$bins[1] & . <= input$bins[2] )
     
+    
     selectHisto <- function(histoParam){
       switch(histoParam,
-             magvce = plot(plotdata1sort$emw, plotdata1sort$events, type="p", main = "Cumulative # of Events vs Magnitude", xlab = "Magnitude", ylab = "Cumulative Number"),
+             magvce = plot(plotdata1sort$emw, plotdata1sort$events, type="p", main = "Cumulative # of Events vs Magnitude", xlab = "Magnitude", ylab = "Cumulative Number", log="y"),
              magvte = hist(plotdata2$emw, breaks = 8, main = "# of Events vs Magnitude", xlab="Magnitude", ylab="Events", col = 'darkblue', border='white'),
-             cevt = plot(plotdata1sort2$datetime, plotdata1sort2$events, type="p", main = "Cumulative # of Events vs Magnitude", xlab = "Magnitude", ylab = "Cumulative Number"),
+             cevt = plot(plotdata1sort2$datetime, plotdata1sort2$events, type="p", main = "Cumulative # of Events vs Magnitude", xlab = "Magnitude", ylab = "Cumulative Number", log="y"),
              tevd = hist(plotdata2$depth, breaks = 20, main = "# of Events vs Depth", xlab = "Depth", col = 'darkorange', border='white'),
              svy = barplot(activeSta$Freq, names.arg = activeSta$.) 
                #hist(activeSta$., breaks = 20, main = "Stations Per Year", xlab="Year", ylab="Stations", col = 'yellow', border='white') #ylim=c(0,400),
