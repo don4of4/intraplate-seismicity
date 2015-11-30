@@ -12,8 +12,8 @@ shinyServer(function(input, output, clientData, session) {
   text <- reactive({
     plotdata <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2])
     plotstations <- subset(stations.iris, format(start, "%Y") >= input$bins[1] & 
-                             format(start, "%Y") <= input$bins[2] & lat >= 33.5 & 
-                             lat <= 45.5 & lon <= -69 & lon >= -85)
+                             format(start, "%Y") <= input$bins[2] & 
+                             lat <= input$manlatmax & lon <= input$manlonmax & lon >= input$manlonmin)
     deduped.plotstations <- unique( plotstations[2:2] )
     
     
