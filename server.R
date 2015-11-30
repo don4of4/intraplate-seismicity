@@ -65,8 +65,8 @@ shinyServer(function(input, output, clientData, session) {
     plotstations <- subset(stations.iris, format(start, "%Y") >= input$bins[1] & 
                              #format(start, "%Y") <= input$bins[2] & lat >= ranges$latmin & 
                              #lat <= ranges$latmax & lon <= ranges$lonmax & lon >= ranges$lonmin)
-                             format(start, "%Y") <= input$bins[2] & lat >= 33.5 & 
-                             lat <= 45.5 & lon <= -69 & lon >= -85)
+                             format(start, "%Y") <= input$bins[2] & lat >= input$manlatmin & 
+                             lat <= input$manlatmax & lon <= input$manlonmax & lon >= input$manlonmin)
     pp <- ggplot() +
       geom_polygon(aes(long,lat, group=group), fill="palegreen3", colour="grey60", data=county) +
       geom_polygon( data=states, aes(x=long, y=lat, group = group),colour="royalblue4", fill=NA) +
@@ -136,13 +136,14 @@ shinyServer(function(input, output, clientData, session) {
   #Earthquakes Plot:
   
   output$plot2 <- renderPlot({
-    plotdata <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2])
+    plotdata <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2] &
+      lat <= input$manlatmax & lon <= input$manlonmax & lon >= input$manlonmin)
     
     pp <- ggplot() +
       geom_polygon(aes(long,lat, group=group), fill="palegreen3", colour="grey60", data=county) +
       geom_polygon( data=states, aes(x=long, y=lat, group = group),colour="royalblue4", fill=NA) +
       annotate("rect", xmin=-84, xmax=-71, ymin=35.5, ymax=43.5, colour="black", size=1, fill="blue", alpha="0.01") +
-      geom_point(size=2, alpha = .7, aes(dataset$lon, dataset$lat, color=dataset$emw)) +
+      geom_point(data=plotdata, size=2, alpha = .7, aes(x=lon, y=lat, color=emw)) +
       scale_color_gradient(low="blue", high="red") +
       theme(plot.background = element_rect(fill = 'grey')) +
       geom_abline(intercept = 3, slope = -.45, color = "grey", size = 1)
@@ -152,7 +153,9 @@ shinyServer(function(input, output, clientData, session) {
   
   
   output$plot4 <- renderPlot({
-    plotdata <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2])
+    plotdata <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2] &
+      lat <= input$manlatmax & lon <= input$manlonmax & lon >= input$manlonmin)
+  
     coordinates=with(plotdata,data.frame(long=lon,lat=lat,depth=depth))
     calc_coordinates=with(plotdata,data.frame(long=lon*100,lat=lat*100,depth=depth))
     model=dbscan(calc_coordinates,MinPts=input$minPts,eps=input$eps)
@@ -162,7 +165,9 @@ shinyServer(function(input, output, clientData, session) {
   })
   
   output$plot5 <- renderPlot({
-    plotdata <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2])
+    plotdata <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2] &
+      lat <= input$manlatmax & lon <= input$manlonmax & lon >= input$manlonmin)
+  
     calc_coordinates=with(plotdata,data.frame(long=lon*100,lat=lat*100,depth=-depth))
     precision=50
     d<<-kde(calc_coordinates,compute.cont=TRUE,gridsize=c(precision,precision,precision))
@@ -175,7 +180,9 @@ shinyServer(function(input, output, clientData, session) {
   
   output$histoPlot <- renderPlot({
     #For histogram CE
-    plotdata1 <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2])
+    plotdata1 <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2] &
+      lat <= input$manlatmax & lon <= input$manlonmax & lon >= input$manlonmin)
+  
     # --> CE by mag
     plotdata1sort <- plotdata1[with(plotdata1, order(-emw)), ]
     plotdata1sort$events <- seq.int(nrow(plotdata1sort))
