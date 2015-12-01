@@ -9,6 +9,7 @@ shinyServer(function(input, output, clientData, session) {
     plotdata <- subset(dataset, as.numeric(format(datetime, "%Y")) >= input$bins[1] & as.numeric(format(datetime, "%Y")) <= input$bins[2]
                        & lat <= input$manlatmax & lat >= input$manlatmin
                        & lon <= input$manlonmax & lon >= input$manlonmin)
+    
     plotstations <- subset(stations.iris, as.numeric(format(start, "%Y")) >= input$bins[1] & 
                              as.numeric(format(start, "%Y")) <= input$bins[2] 
                              & lat <= input$manlatmax & lat >= input$manlatmin
@@ -67,7 +68,6 @@ shinyServer(function(input, output, clientData, session) {
       geom_polygon( data=states, aes(x=long, y=lat, group = group),colour="royalblue4", fill=NA) +
       annotate("rect", xmin=-84, xmax=-71, ymin=35.5, ymax=43.5, colour="black", size=1, fill="blue", alpha="0.01") +
       geom_point(data=plotstations, size=4, alpha = .7, aes(x=lon, y=lat), color="yellow", shape=17) +
-      coord_cartesian(xlim = ranges$latbrush, ylim = ranges$lonbrush) + #for brush frame (was out)
       #geom_point(data=plotdata, size=3, alpha = .7, aes(x=lon, y=lat, color=emw)) + #was out
       #scale_color_gradient(low="blue", high="red") + #was out
       theme(plot.background = element_rect(fill = 'grey')) +
@@ -169,19 +169,17 @@ shinyServer(function(input, output, clientData, session) {
 #     }
     
     #For histogram TE vs depth & Mag vs TE
-    plotdata2 <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2])
+    plotdata2 <- subset(dataset, as.numeric(format(datetime, "%Y")) >= input$bins[1] & as.numeric(format(datetime, "%Y")) <= input$bins[2])
     
     #For stations/year graph
     #-> grads stations within the geo boundaries, that are active
     plotstations <- subset(stations.iris, 
-                             format(start, "%Y") >= input$bins[1]
-                             & format(start, "%Y") <= input$bins[2]
-                             #& format(end, "%Y") >= input$bins[1]
-                             & format(end, "%Y") >= input$bins[2]
+                           as.numeric(format(start, "%Y")) >= input$bins[1]
+                             & as.numeric(format(start, "%Y")) <= input$bins[2]
+                             & as.numeric(format(end, "%Y")) >= input$bins[2]
                              & lat <= input$manlatmax & lat >= input$manlatmin
                              & lon <= input$manlonmax & lon >= input$manlonmin)
-                             #& lat >= 33.5 & lat <= 45.5 
-                             #& lon <= -69 & lon >= -85)
+
     #-> creates a dataframe with formatted station, start and end, without duplicates
     df <- plotstations[,c('sta','start', 'end')]
     df$start <- as.Date(df$start, "%Y")
@@ -197,7 +195,8 @@ shinyServer(function(input, output, clientData, session) {
   
     #activeSta$Freq used to determine active stations for given year
     
-    activeSta <- subset(active, . >= input$bins[1] & . <= input$bins[2] )
+    #disabled not meaningful for factors
+#activeSta <- subset(active, . >= input$bins[1] & . <= input$bins[2] )
     
     
     selectHisto <- function(histoParam){
