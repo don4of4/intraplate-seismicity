@@ -10,14 +10,13 @@ shinyServer(function(input, output, clientData, session) {
   
   # Create a reactive text
   text <- reactive({
-    plotdata <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2])
+    plotdata <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2]
+                       & lat <= input$manlatmax & lat >= input$manlatmin
+                       & lon <= input$manlonmax & lon >= input$manlonmin)
     plotstations <- subset(stations.iris, format(start, "%Y") >= input$bins[1] & 
                              format(start, "%Y") <= input$bins[2] 
                              & lat <= input$manlatmax & lat >= input$manlatmin
-                             & lon <= input$manlonmax & lon >= input$manlonmin
-                             #& lat >= 33.5 & 
-                             #lat <= 45.5 & lon <= -69 & lon >= -85
-                           )
+                             & lon <= input$manlonmax & lon >= input$manlonmin)
     deduped.plotstations <- unique( plotstations[2:2] )
     
     
@@ -60,19 +59,13 @@ shinyServer(function(input, output, clientData, session) {
   
   #Stations Plot:
   
-  #Zoom features for Plot
-  #ranges <- reactiveValues(lon = NULL, lat = NULL)
-  ranges <- reactiveValues(latbrush = NULL, lonbrush = NULL)
-  
   
   output$plot <- renderPlot({
     
     plotdata <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2])
-    plotstations <- subset(stations.iris, format(start, "%Y") >= input$bins[1] & 
-                             #format(start, "%Y") <= input$bins[2] & lat >= ranges$latmin & 
-                             #lat <= ranges$latmax & lon <= ranges$lonmax & lon >= ranges$lonmin)
-                             format(start, "%Y") <= input$bins[2] & lat >= input$manlatmin & 
-                             lat <= input$manlatmax & lon <= input$manlonmax & lon >= input$manlonmin)
+    plotstations <- subset(stations.iris, format(start, "%Y") >= input$bins[1] & format(start, "%Y") <= input$bins[2] 
+                           & lat >= input$manlatmin & lat <= input$manlatmax 
+                           & lon <= input$manlonmax & lon >= input$manlonmin)
     pp <- ggplot() +
       geom_polygon(aes(long,lat, group=group), fill="palegreen3", colour="grey60", data=county) +
       geom_polygon( data=states, aes(x=long, y=lat, group = group),colour="royalblue4", fill=NA) +
@@ -104,46 +97,14 @@ shinyServer(function(input, output, clientData, session) {
     )
   })
   
-  #ranges <- reactiveValues(x = NULL, y = NULL)
-  
-  # When a double-click happens, check if there's a brush on the plot.
-  # If so, zoom to the brush bounds; if not, reset the zoom.
-  observeEvent(input$plot_dblclick, {
-    print("DOUBLE CLICK IS REGISTERING") #test line
-    brush <- input$plot_brush
-    print("Selected coords:", brush$xmin, brush$xmax) #test line
-    print(brush$xmin) #test line
-    if (!is.null(brush)) {
-      #plotstations <- subset(stations.iris, format(start, "%Y") >= input$bins[1] & 
-      #format(start, "%Y") <= input$bins[2] & lat >= latmin & 
-      #lat <= latmax & lon <= lonmax & lon >= lonmin)
-      #                        format(start, "%Y") <= input$bins[2] & lat >= 40 & 
-      #                       lat <= 45.5 & lon <= -80 & lon >= -85)
-      #format(start, "%Y") <= input$bins[2] & lat >= 35 & lat <= 40 & lon <= -75 & lon >= -80
-      #ranges$x <- c(brush$xmin, brush$xmax)
-      #ranges$y <- c(brush$ymin, brush$ymax)
-      
-      #plotstations <- subset(plotstations, format(start, "%Y") >= input$bins[1] &
-      #                             format(start, "%Y") <= input$bins[2] & lat >= 40 & 
-      #                             lat <= 45.5 & lon <= -80 & lon >= -85)
-      
-      #test.data <- plotstationsZoom
-      
-      ranges$latbrush <- c(brush$xmin, brush$xmax)
-      ranges$lonbrush <- c(brush$ymin, brush$ymax)
-      
-      
-    } else {
-      ranges$latbrush <- NULL
-      ranges$lonbrush <- NULL
-    }
-  })
+ 
   
   #Earthquakes Plot:
   
   output$plot2 <- renderPlot({
-    plotdata <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2] &
-      lat <= input$manlatmax & lon <= input$manlonmax & lon >= input$manlonmin)
+    plotdata <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2] 
+                       & lat <= input$manlatmax & lat >= input$manlatmin
+                       & lon <= input$manlonmax & lon >= input$manlonmin)
     
     pp <- ggplot() +
       geom_polygon(aes(long,lat, group=group), fill="palegreen3", colour="grey60", data=county) +
@@ -160,8 +121,9 @@ shinyServer(function(input, output, clientData, session) {
   
   
   output$plot4 <- renderPlot({
-    plotdata <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2] &
-      lat <= input$manlatmax & lon <= input$manlonmax & lon >= input$manlonmin)
+    plotdata <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2] 
+                       & lat <= input$manlatmax & lat >= input$manlatmin
+                       & lon <= input$manlonmax & lon >= input$manlonmin)
   
     coordinates=with(plotdata,data.frame(long=lon,lat=lat,depth=depth))
     calc_coordinates=with(plotdata,data.frame(long=lon*100,lat=lat*100,depth=depth))
@@ -172,8 +134,9 @@ shinyServer(function(input, output, clientData, session) {
   })
   
   output$plot5 <- renderPlot({
-    plotdata <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2] &
-      lat <= input$manlatmax & lon <= input$manlonmax & lon >= input$manlonmin)
+    plotdata <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2] 
+                       & lat <= input$manlatmax & lat >= input$manlatmin
+                       & lon <= input$manlonmax & lon >= input$manlonmin)
   
     calc_coordinates=with(plotdata,data.frame(long=lon*100,lat=lat*100,depth=-depth))
     precision=50

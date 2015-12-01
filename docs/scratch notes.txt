@@ -75,3 +75,62 @@ observeEvent(input$tplot_dblclick, {
     ranges2$y <- NULL
   }
     #deduped.plotstations <- unique( df[1:2] )
+
+
+
+
+
+
+ #ranges <- reactiveValues(x = NULL, y = NULL)
+  
+  # When a double-click happens, check if there's a brush on the plot.
+  # If so, zoom to the brush bounds; if not, reset the zoom.
+  observeEvent(input$plot_dblclick, {
+    print("DOUBLE CLICK IS REGISTERING") #test line
+    brush <- input$plot_brush
+    print("Selected coords:", brush$xmin, brush$xmax) #test line
+    print(brush$xmin) #test line
+    if (!is.null(brush)) {
+      #plotstations <- subset(stations.iris, format(start, "%Y") >= input$bins[1] & 
+      #format(start, "%Y") <= input$bins[2] & lat >= latmin & 
+      #lat <= latmax & lon <= lonmax & lon >= lonmin)
+      #                        format(start, "%Y") <= input$bins[2] & lat >= 40 & 
+      #                       lat <= 45.5 & lon <= -80 & lon >= -85)
+      #format(start, "%Y") <= input$bins[2] & lat >= 35 & lat <= 40 & lon <= -75 & lon >= -80
+      #ranges$x <- c(brush$xmin, brush$xmax)
+      #ranges$y <- c(brush$ymin, brush$ymax)
+      
+      #plotstations <- subset(plotstations, format(start, "%Y") >= input$bins[1] &
+      #                             format(start, "%Y") <= input$bins[2] & lat >= 40 & 
+      #                             lat <= 45.5 & lon <= -80 & lon >= -85)
+      
+      #test.data <- plotstationsZoom
+      
+      ranges$latbrush <- c(brush$xmin, brush$xmax)
+      ranges$lonbrush <- c(brush$ymin, brush$ymax)
+      
+      
+    } else {
+      ranges$latbrush <- NULL
+      ranges$lonbrush <- NULL
+    }
+  })
+
+
+
+
+
+
+=======
+                             format(start, "%Y") <= input$bins[2] & 
+                             lat <= input$manlatmax & lon <= input$manlonmax & lon >= input$manlonmin)
+>>>>>>> d9554033923c9d81dec18c90483ff0e181bf7f2a
+
+
+
+
+
+
+
+#format(start, "%Y") <= input$bins[2] & lat >= ranges$latmin & 
+                             #lat <= ranges$latmax & lon <= ranges$lonmax & lon >= ranges$lonmin)
