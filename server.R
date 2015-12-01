@@ -187,11 +187,11 @@ shinyServer(function(input, output, clientData, session) {
     
     mutate_each(df, funs(year(.)), start:end) -> temp
     #DON LOOK HERE ^ and below
-    active <- sapply(1:nrow(temp), function(x){
-      seq(temp[x, 2], temp[x, 3], by = 1)}) %>%
-      unlist %>%
-      table %>%
-      data.frame
+    #active <- sapply(1:nrow(temp), function(x){
+    #  seq(temp[x, 2], temp[x, 3], by = 1)}) %>%
+    #  unlist %>%
+    #  table %>%
+    #  data.frame
   
     #activeSta$Freq used to determine active stations for given year
     
