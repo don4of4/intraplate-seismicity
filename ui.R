@@ -51,7 +51,7 @@ shinyUI(
         br(), br(),
         
         h4("Set Region"),
-        h6("Manually enter coordinates to display.."),
+        h6("Manually enter coordinates to display"),
         
         h5("Latitude"),
         column( width=10, offset=1,

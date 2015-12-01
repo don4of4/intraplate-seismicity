@@ -36,14 +36,9 @@ shinyServer(function(input, output, clientData, session) {
   
   # Return as text the selected variables
   output$caption <- renderText({
-    #psOrig <- plotstations;
     text()
-    #if (!is.null(changes(psOrig, plotstations))) {text()}
   })
   
-  #observeEvent(input$do, {
-  #  updateSliderInput("bins", value = c(input$bins[1],input$bins[2]+5))
-  #})
   observeEvent(input$increment_end_year, {
     updateSliderInput(session, "bins", value = c(input$bins[1],input$bins[2]+1))
   })
@@ -52,10 +47,7 @@ shinyServer(function(input, output, clientData, session) {
   })
   
   
-  ## Generate a plot of the requested variables ##
-  
   #Stations Plot:
-  
   
   output$plot <- renderPlot({
     
@@ -74,6 +66,7 @@ shinyServer(function(input, output, clientData, session) {
       geom_abline(intercept = 3, slope = -.45, color = "grey", size = 1)
     
     print(pp)
+    
     ## Download ##
     datasetInput <- reactive({
       switch(input$downloadset,
@@ -96,7 +89,6 @@ shinyServer(function(input, output, clientData, session) {
  
   
   #Earthquakes Plot:
-  
   output$plot2 <- renderPlot({
     plotdata <- subset(dataset, as.numeric(format(datetime, "%Y")) >= input$bins[1] & as.numeric(format(datetime, "%Y")) <= input$bins[2] 
                        & lat <= input$manlatmax & lat >= input$manlatmin
@@ -115,7 +107,7 @@ shinyServer(function(input, output, clientData, session) {
     print(pp)
   })
   
-  
+  #DBScan Plot:
   output$plot4 <- renderPlot({
     plotdata <- subset(dataset, as.numeric(format(datetime, "%Y")) >= input$bins[1] & as.numeric(format(datetime, "%Y")) <= input$bins[2] 
                        & lat <= input$manlatmax & lat >= input$manlatmin
@@ -129,6 +121,7 @@ shinyServer(function(input, output, clientData, session) {
     
   })
   
+  #3D Plot:
   output$plot5 <- renderPlot({
     plotdata <- subset(dataset, as.numeric(format(datetime, "%Y")) >= input$bins[1] & as.numeric(format(datetime, "%Y")) <= input$bins[2] 
                        & lat <= input$manlatmax & lat >= input$manlatmin
