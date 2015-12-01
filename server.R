@@ -1,20 +1,16 @@
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load("shiny","datasets","ggplot2","scatterplot3d","ks")
-install.packages('lubridate')
-#install.packages('dplyr')
-library(lubridate)
-library(dplyr)
+pacman::p_load("shiny","datasets","ggplot2","scatterplot3d","ks","fpc","dplyr","lubridate")
 
 
 shinyServer(function(input, output, clientData, session) {
   
   # Create a reactive text
   text <- reactive({
-    plotdata <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2]
+    plotdata <- subset(dataset, as.numeric(format(datetime, "%Y")) >= input$bins[1] & as.numeric(format(datetime, "%Y")) <= input$bins[2]
                        & lat <= input$manlatmax & lat >= input$manlatmin
                        & lon <= input$manlonmax & lon >= input$manlonmin)
-    plotstations <- subset(stations.iris, format(start, "%Y") >= input$bins[1] & 
-                             format(start, "%Y") <= input$bins[2] 
+    plotstations <- subset(stations.iris, as.numeric(format(start, "%Y")) >= input$bins[1] & 
+                             as.numeric(format(start, "%Y")) <= input$bins[2] 
                              & lat <= input$manlatmax & lat >= input$manlatmin
                              & lon <= input$manlonmax & lon >= input$manlonmin)
     deduped.plotstations <- unique( plotstations[2:2] )
@@ -62,8 +58,8 @@ shinyServer(function(input, output, clientData, session) {
   
   output$plot <- renderPlot({
     
-    plotdata <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2])
-    plotstations <- subset(stations.iris, format(start, "%Y") >= input$bins[1] & format(start, "%Y") <= input$bins[2] 
+    plotdata <- subset(dataset, as.numeric(format(datetime, "%Y")) >= input$bins[1] & as.numeric(format(datetime, "%Y")) <= input$bins[2])
+    plotstations <- subset(stations.iris, as.numeric(format(start, "%Y")) >= input$bins[1] & as.numeric(format(start, "%Y")) <= input$bins[2] 
                            & lat >= input$manlatmin & lat <= input$manlatmax 
                            & lon <= input$manlonmax & lon >= input$manlonmin)
     pp <- ggplot() +
@@ -102,7 +98,7 @@ shinyServer(function(input, output, clientData, session) {
   #Earthquakes Plot:
   
   output$plot2 <- renderPlot({
-    plotdata <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2] 
+    plotdata <- subset(dataset, as.numeric(format(datetime, "%Y")) >= input$bins[1] & as.numeric(format(datetime, "%Y")) <= input$bins[2] 
                        & lat <= input$manlatmax & lat >= input$manlatmin
                        & lon <= input$manlonmax & lon >= input$manlonmin)
     
@@ -121,7 +117,7 @@ shinyServer(function(input, output, clientData, session) {
   
   
   output$plot4 <- renderPlot({
-    plotdata <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2] 
+    plotdata <- subset(dataset, as.numeric(format(datetime, "%Y")) >= input$bins[1] & as.numeric(format(datetime, "%Y")) <= input$bins[2] 
                        & lat <= input$manlatmax & lat >= input$manlatmin
                        & lon <= input$manlonmax & lon >= input$manlonmin)
   
@@ -134,7 +130,7 @@ shinyServer(function(input, output, clientData, session) {
   })
   
   output$plot5 <- renderPlot({
-    plotdata <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2] 
+    plotdata <- subset(dataset, as.numeric(format(datetime, "%Y")) >= input$bins[1] & as.numeric(format(datetime, "%Y")) <= input$bins[2] 
                        & lat <= input$manlatmax & lat >= input$manlatmin
                        & lon <= input$manlonmax & lon >= input$manlonmin)
   
@@ -150,7 +146,7 @@ shinyServer(function(input, output, clientData, session) {
   
   output$histoPlot <- renderPlot({
     #For histogram CE
-    plotdata1 <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2]
+    plotdata1 <- subset(dataset, as.numeric(format(datetime, "%Y")) >= input$bins[1] & as.numeric(format(datetime, "%Y")) <= input$bins[2]
       & lat <= input$manlatmax & lat >= input$manlatmin
       & lon <= input$manlonmax & lon >= input$manlonmin)
   
@@ -206,10 +202,10 @@ shinyServer(function(input, output, clientData, session) {
     
     selectHisto <- function(histoParam){
       switch(histoParam,
-             magvce = plot(plotdata1sort$emw, plotdata1sort$events, type="p", main = "Cumulative # of Events vs Magnitude", xlab = "Magnitude", ylab = "Cumulative Number", log="y"),
-             magvte = hist(plotdata2$emw, breaks = 8, main = "# of Events vs Magnitude", xlab="Magnitude", ylab="Events", col = 'darkblue', border='white'),
-             cevt = plot(plotdata1sort2$datetime, plotdata1sort2$events, type="p", main = "Cumulative # of Events vs Magnitude", xlab = "Magnitude", ylab = "Cumulative Number", log="y"),
-             tevd = hist(plotdata2$depth, breaks = 20, main = "# of Events vs Depth", xlab = "Depth", col = 'darkorange', border='white'),
+             magvce = plot(plotdata1sort$emw, plotdata1sort$events, type="p", main = "Cumulative Num. of Events vs Magnitude", xlab = "Magnitude", ylab = "Cumulative Number", log="y"),
+             magvte = hist(plotdata2$emw, breaks = 8, main = "Num. of Events vs Magnitude", xlab="Magnitude", ylab="Events", col = 'darkblue', border='white'),
+             cevt = plot(plotdata1sort2$datetime, plotdata1sort2$events, type="p", main = "Cumulative Num. of Events over Time", xlab = "Magnitude", ylab = "Cumulative Number", log="y"),
+             tevd = hist(plotdata2$depth, breaks = 20, main = "Num. of Events vs Depth", xlab = "Depth", col = 'darkorange', border='white'),
              svy = barplot(activeSta$Freq, names.arg = activeSta$.) 
                #hist(activeSta$., breaks = 20, main = "Stations Per Year", xlab="Year", ylab="Stations", col = 'yellow', border='white') #ylim=c(0,400),
       )
