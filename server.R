@@ -12,8 +12,12 @@ shinyServer(function(input, output, clientData, session) {
   text <- reactive({
     plotdata <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2])
     plotstations <- subset(stations.iris, format(start, "%Y") >= input$bins[1] & 
-                             format(start, "%Y") <= input$bins[2] & lat >= 33.5 & 
-                             lat <= 45.5 & lon <= -69 & lon >= -85)
+                             format(start, "%Y") <= input$bins[2] 
+                             & lat <= input$manlatmax & lat >= input$manlatmin
+                             & lon <= input$manlonmax & lon >= input$manlonmin
+                             #& lat >= 33.5 & 
+                             #lat <= 45.5 & lon <= -69 & lon >= -85
+                           )
     deduped.plotstations <- unique( plotstations[2:2] )
     
     
@@ -36,7 +40,9 @@ shinyServer(function(input, output, clientData, session) {
   
   # Return as text the selected variables
   output$caption <- renderText({
+    #psOrig <- plotstations;
     text()
+    #if (!is.null(changes(psOrig, plotstations))) {text()}
   })
   
   #observeEvent(input$do, {
@@ -143,6 +149,7 @@ shinyServer(function(input, output, clientData, session) {
       geom_polygon(aes(long,lat, group=group), fill="palegreen3", colour="grey60", data=county) +
       geom_polygon( data=states, aes(x=long, y=lat, group = group),colour="royalblue4", fill=NA) +
       annotate("rect", xmin=-84, xmax=-71, ymin=35.5, ymax=43.5, colour="black", size=1, fill="blue", alpha="0.01") +
+      #annotate("rect", xmin=input$manlonmin, xmax=input$manlonmax, ymin=input$manlatmin, ymax=input$manlatmax, colour="black", size=1, fill="blue", alpha="0.01") +
       geom_point(data=plotdata, size=2, alpha = .7, aes(x=lon, y=lat, color=emw)) +
       scale_color_gradient(low="blue", high="red") +
       theme(plot.background = element_rect(fill = 'grey')) +
@@ -180,8 +187,9 @@ shinyServer(function(input, output, clientData, session) {
   
   output$histoPlot <- renderPlot({
     #For histogram CE
-    plotdata1 <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2] &
-      lat <= input$manlatmax & lon <= input$manlonmax & lon >= input$manlonmin)
+    plotdata1 <- subset(dataset, format(datetime, "%Y") >= input$bins[1] & format(datetime, "%Y") <= input$bins[2]
+      & lat <= input$manlatmax & lat >= input$manlatmin
+      & lon <= input$manlonmax & lon >= input$manlonmin)
   
     # --> CE by mag
     plotdata1sort <- plotdata1[with(plotdata1, order(-emw)), ]
@@ -211,8 +219,10 @@ shinyServer(function(input, output, clientData, session) {
                              & format(start, "%Y") <= input$bins[2]
                              #& format(end, "%Y") >= input$bins[1]
                              & format(end, "%Y") >= input$bins[2]
-                             & lat >= 33.5 & lat <= 45.5 
-                             & lon <= -69 & lon >= -85)
+                             & lat <= input$manlatmax & lat >= input$manlatmin
+                             & lon <= input$manlonmax & lon >= input$manlonmin)
+                             #& lat >= 33.5 & lat <= 45.5 
+                             #& lon <= -69 & lon >= -85)
     #-> creates a dataframe with formatted station, start and end, without duplicates
     df <- plotstations[,c('sta','start', 'end')]
     df$start <- as.Date(df$start, "%Y")
@@ -248,32 +258,5 @@ shinyServer(function(input, output, clientData, session) {
   })
   
   
-  ##TEST PLOT##
-  
-  # Single zoomable plot (on left)
-  ranges <- reactiveValues(x = NULL, y = NULL)
-  
-  output$tplot <- renderPlot({
-    ggplot(mtcars, aes(wt, mpg)) +
-      geom_point() +
-      coord_cartesian(xlim = ranges$x, ylim = ranges$y)
-  })
-  
-  # When a double-click happens, check if there's a brush on the plot.
-  # If so, zoom to the brush bounds; if not, reset the zoom.
-  observeEvent(input$tplot_dblclick, {
-    #print("hello")
-    brush <- input$tplot_brush
-    if (!is.null(brush)) {
-      ranges$x <- c(brush$xmin, brush$xmax)
-      ranges$y <- c(brush$ymin, brush$ymax)
-      
-    } else {
-      ranges$x <- NULL
-      ranges$y <- NULL
-    }
-  })
-  
-  #END TEST PLOT FUNCTIONS
   
 })

@@ -52,15 +52,23 @@ shinyUI(
         
         h4("Set Region"),
         h6("Manually enter coordinates to display.."),
-        #fluidRow( #column(width=6,
-        h5("Latitude"),
-        numericInput("manlatmin", "Min:", 35.5, min = 35.5, max = 43.5, width='75px'),
-        numericInput("manlatmax", "Max:", 43.5, min = 35.5, max = 43.5, width='75px'),
-        h5("Longitude"),
-        numericInput("manlonmin", "Min:", -84, min = -84, max = -71, width='75px'),
-        numericInput("manlonmax", "Max:", -71, min = -84, max = -71, width='75px'),
         
-        br(), br(),
+        h5("Latitude"),
+        column( width=10, offset=1,
+        fluidRow(
+          div(style="display:inline-block", numericInput("manlatmin", "Min:", 35.5, min = 35.5, max = 43.5, width='75px')),
+          div(style="display:inline-block", numericInput("manlatmax", "Max:", 43.5, min = 35.5, max = 43.5, width='75px'))
+        )),
+        br(),
+        
+        h5("Longitude"),
+        column( width=10, offset=1,
+        fluidRow(
+          div(style="display:inline-block", numericInput("manlonmin", "Min:", -84, min = -84, max = -71, width='75px')),
+          div(style="display:inline-block", numericInput("manlonmax", "Max:", -71, min = -84, max = -71, width='75px'))
+        )),
+        
+        br(),
         
         conditionalPanel(condition="input.tabs == 'Statistics'", 
                          h4("Generate Statistics")),
@@ -72,6 +80,8 @@ shinyUI(
                                         "# of Events vs Depth" = "tevd",
                                         "Stations vs Year" = "svy"),
                                       selected="magvce", inline=FALSE)),
+        br(), br(),
+        
         h4("Download Data"),
         selectInput("downloadset", "Choose a dataset:", 
                     choices = c("stations", "earthquakes")),
