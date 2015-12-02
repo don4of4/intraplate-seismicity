@@ -255,7 +255,7 @@ shinyServer(function(input, output, clientData, session) {
              magvce = cum_function(),
              magvte = hist(plotdata2$emw, breaks = 8, main = "Num. of Events vs Magnitude", xlab="Magnitude", ylab="Events", col = 'darkblue', border='white'),
              #magvte = plot(plotdata2$emw, log="y", type='h', lwd=10, lend=2, main = "Num. of Events vs Magnitude", xlab="Magnitude", ylab="Events", col = 'darkblue', border='white'),
-             cevt = plot(plotdata1sort2$datetime, plotdata1sort2$events, type="p", main = "Cumulative Num. of Events over Time", xlab = "Magnitude", ylab = "Cumulative Number", log="y"),
+             cevt = plot(plotdata1sort2$datetime, plotdata1sort2$events, type="p", main = "Cumulative Num. of Events over Time", xlab = "Time", ylab = "Cumulative Number", log="y"),
              tevd = hist(plotdata2$depth, breaks = 15, main = "Num. of Events vs Depth", xlab = "Depth", col = 'darkorange', border='white')
              #svy = barplot(activeSta$Freq, names.arg = activeSta$.)
              )
