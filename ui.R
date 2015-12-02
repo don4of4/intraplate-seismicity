@@ -49,6 +49,8 @@ shinyUI(
         h4("Set Time Range"),
         actionButton("decrement_end_year", "End-date -1ys"),
         actionButton("increment_end_year", "End-date +1ys"),
+        actionButton("decrement_start_year", "Start-date -1ys"),
+        actionButton("increment_start_year", "Start-date +1ys"),
         
         br(), br(),
         
