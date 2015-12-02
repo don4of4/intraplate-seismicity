@@ -1,5 +1,5 @@
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load("maps","dplyr","ggplot2","fpc","fossil","WeightedCluster","shinyRGL","scatterplot3d","ks")
+pacman::p_load("maps","dplyr","ggplot2","fpc","fossil","WeightedCluster","shinyRGL","scatterplot3d","ks", "shiny")
 
 # NEIC data set
 data.neic <- read.table("data/NEIC_HM_2014.csv", header = TRUE, sep = ",")
@@ -60,7 +60,6 @@ data.anss$emw <- ifelse(data.anss$magtype == "ML", 0.806*data.anss$mag + 0.633,
 data.anss <- subset(data.anss, data.anss$emw > 0)
 
 # Filter out based on lat and long
-m <- rbind.fill(data.neic, data.anss)
 m <- dplyr::bind_rows(data.neic, data.anss)
 dataset <- subset(m, lat >= 35.5 & lat <= 43.5 & lon <= -71 & lon >= -84)
 

@@ -1,5 +1,6 @@
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load("shiny","datasets","ggplot2","scatterplot3d","ks","fpc","dplyr","lubridate")
+pacman::p_load("shiny","datasets","ggplot2","scatterplot3d","ks","fpc","dplyr","lubridate","stats","base")
+
 
 
 shinyServer(function(input, output, clientData, session) {
@@ -137,33 +138,81 @@ shinyServer(function(input, output, clientData, session) {
   
   #Histogram Plot
   
-  output$histoPlot <- renderPlot({
-    #For histogram CE
-    plotdata1 <- subset(dataset, as.numeric(format(datetime, "%Y")) >= input$bins[1] & as.numeric(format(datetime, "%Y")) <= input$bins[2]
+  output$histoPlot <-  renderPlot({ 
+    options( warn = 0 )
+    
+    #For histogram CE & histogram TE vs depth & Mag vs TE
+    plotdata1 <- plotdata2 <- subset(dataset, as.numeric(format(datetime, "%Y")) >= input$bins[1] & as.numeric(format(datetime, "%Y")) <= input$bins[2]
       & lat <= input$manlatmax & lat >= input$manlatmin
       & lon <= input$manlonmax & lon >= input$manlonmin)
   
-    # --> CE by mag
+    # --> Cum. Number mag
     plotdata1sort <- plotdata1[with(plotdata1, order(-emw)), ]
     plotdata1sort$events <- seq.int(nrow(plotdata1sort))
+    
+    cum_function <- function(){ 
+   
+      # Use dplyr pipelining  %>% to query the data
+      # Merges events of identical emw and counts them by that group.
+      frequency_aggregate <- plotdata1 %>% select(emw)  %>% group_by(emw) %>% tally(sort = FALSE) %>% arrange(desc(emw))
+      
+      # Uses frequency_aggregate to generate cumulative frequency.  Trendline using loess method.
+      cum_frequency <- frequency_aggregate %>% mutate(cum = cumsum(n)) %>% select(emw, cum)
+      # Example of approx. how to get the trendline without stealing it from the plot (below)
+        # cum_frequency_loess <- loess(cum ~ log10(emw), data=cum_frequency, span=0.5)
+        # cum_frequency_trendline <- predict(cum_frequency_loess, se=TRUE)
+      
+      # eps = Machine epsilon -> I.e. Floating-point relative accuracy
+      # Aka the smallest unit before we will see truncation
+      eps <- .Machine$double.eps
+      # Percision p (See: https://en.wikipedia.org/wiki/Machine_epsilon)
+      p <- log2(.Machine$double.eps)*-1 + 1
+      
+      # Set our paritions (for derivative estimation) to  1/ max(1/4 the percision and p of 14)
+      # Basically, we need a large sample, within reason.
+      partitions <- 1/max(2^-(p/4),2^-14)
+      
+      # Consider also (future): http://stackoverflow.com/questions/14207250/determining-derivatives-from-gam-smooth-object
+      
+      # Do the initial graph and smoothing, note we request 1000 pts for the curve to reduce noise later
+      cum_frequency_graph <- ggplot(aes(x=emw, y=cum), data=cum_frequency, xmin=0) + geom_point(size=3, shape=21, color="cyan4", fill="cyan4") + ggtitle("Cumulative Frequency on Magnitude") +
+                             scale_x_continuous("Magnitude (MMS)") + scale_y_log10("Cumulative Frequency",limits=c(1,NA), breaks = (2**(1:10))) +
+                             expand_limits(x=c(0,6)) + theme(text = element_text(size=18, face="bold")) + 
+                             stat_smooth(aes(outfit=fit<<-..y..,outx=fitx<<-..x.., color="Loess Curve (span=0.7)"), formula=y~log(x),method="loess", se=FALSE, n = partitions, size=0.5, span = 0.7, na.rm = TRUE) +
+                             stat_smooth(aes(color="Loess Curve (span=0.6)"), formula=y~log(x),method="loess", se=TRUE, size=1, span = 0.6, na.rm = TRUE) +
+                             scale_colour_manual("Key:", breaks = c("Loess Curve (span=0.7)","Loess Curve (span=0.6)", "1st Derivative (LC(s=0.7))","Mc"), values = c("blue","cyan","red","purple"))
+      
+      # Note aes(outfit=fit<<-..y..) is a hack to extract the y axis of the fit to variable "fit" ... see also fitx
+      # Also note, we need to run the plot to grab the trend.
+      # ALSO: Suppress na.rm warnings that leak (na.rm is supported to silence warnings about hidden points due to axis limits)
+      #suppressWarnings(cum_frequency_graph) 
+      #ggsave(cum_frequency_graph, file="cum_frequency_graph.png")
+      
+      print(cum_frequency_graph)
+      
+      # Convert our trendline from log10 scale
+      cum_frequency_trendline <- data.frame(x=fitx, y=10^fit) 
+     
+      # Use finite differences to approximate the derivatives of the smoothed terms
+      # See http://en.wikipedia.org/wiki/Finite_difference
+      dY <- diff(cum_frequency_trendline$y)/diff(cum_frequency_trendline$x)*-1  # the derivative of your function
+      dX <- rowMeans(embed(cum_frequency_trendline$x,2)) # centers the X values for plotting
+      
+      cum_frequency_derivative <- data.frame(dX, dY, abs_max=(dY==max(dY))) %>% filter(dY>=0)
+      cum_frequency_derivative.max_pt <- cum_frequency_derivative %>% filter(abs_max==TRUE)
+      
+      # Plot derivative + Maximum
+      cum_frequency_graph <- cum_frequency_graph + geom_line(data=cum_frequency_derivative, 
+                             aes(x=dX, y=log(dY), color="1st Derivative (LC(s=0.7))"), size=1, alpha=0.5, na.rm = TRUE) +
+                             geom_vline(xintercept=cum_frequency_derivative.max_pt$dX[1]) + 
+                             geom_point(data=cum_frequency_derivative.max_pt,aes(x=dX, y=dY), fill="purple", size=5, shape=25, na.rm = TRUE)
+                             
+      return(cum_frequency_graph) 
+    }
     # --> CE by time
     plotdata1sort2 <- plotdata1[with(plotdata1, order(datetime)), ]
     plotdata1sort2$events <- seq.int(nrow(plotdata1sort))
-    #--> For log scaling
-    #ticks <- seq(-2, 2, by=1)
-    #labels <- sapply(ticks, function(i) as.expression(bquote(10^ .(i))))
-    #axis(1, at=c(0.01, 0.1, 1, 10, 100), labels=labels)
-     
-#     logPlotMag <- function(){
-#       plot(plotdata1sort$emw, plotdata1sort$events, type="p", main = "Cumulative # of Events vs Magnitude", xlab = "Magnitude", ylab = "Cumulative Number", log="y")
-#       #ticks <- axTicks(2) #seq(0, 6, by=1)
-#       labels <- sapply(axTicks(2), function(i) as.expression(bquote(10^ .(i))))
-#       axis(2, at=axTicks(2), labels=labels) #at=c(0, 0.01, 0.1, 1, 10, 100, 1000)
-#     }
-    
-    #For histogram TE vs depth & Mag vs TE
-    plotdata2 <- subset(dataset, as.numeric(format(datetime, "%Y")) >= input$bins[1] & as.numeric(format(datetime, "%Y")) <= input$bins[2])
-    
+
     #For stations/year graph
     #-> grads stations within the geo boundaries, that are active
     plotstations <- subset(stations.iris, 
@@ -194,20 +243,18 @@ shinyServer(function(input, output, clientData, session) {
     
     selectHisto <- function(histoParam){
       switch(histoParam,
-             magvce = plot(plotdata1sort$emw, plotdata1sort$events, type="p", main = "Cumulative Num. of Events vs Magnitude", xlab = "Magnitude", ylab = "Cumulative Number", log="y"),
+             magvce = cum_function(),
              magvte = hist(plotdata2$emw, breaks = 8, main = "Num. of Events vs Magnitude", xlab="Magnitude", ylab="Events", col = 'darkblue', border='white'),
              cevt = plot(plotdata1sort2$datetime, plotdata1sort2$events, type="p", main = "Cumulative Num. of Events over Time", xlab = "Magnitude", ylab = "Cumulative Number", log="y"),
              tevd = hist(plotdata2$depth, breaks = 20, main = "Num. of Events vs Depth", xlab = "Depth", col = 'darkorange', border='white'),
-             svy = barplot(activeSta$Freq, names.arg = activeSta$.) 
+             #svy = barplot(activeSta$Freq, names.arg = activeSta$.) 
                #hist(activeSta$., breaks = 20, main = "Stations Per Year", xlab="Year", ylab="Stations", col = 'yellow', border='white') #ylim=c(0,400),
       )
     }
     
-    selectHisto(input$histoParam)
-   
-     
+    
+    return (selectHisto(input$histoParam))
   })
-  
   
   
 })

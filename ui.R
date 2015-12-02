@@ -17,6 +17,7 @@ pacman::p_load("shiny", "rstudioapi")
 library(shiny)
 library(shinyRGL)
 
+
 shinyUI(
   fluidPage(
     # Application title
@@ -38,6 +39,7 @@ shinyUI(
                     step=5)
       )
     ),
+    
     
     # Sidebar with a slider input for number of bins
     sidebarLayout(
