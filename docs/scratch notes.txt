@@ -134,3 +134,18 @@ observeEvent(input$tplot_dblclick, {
 
 #format(start, "%Y") <= input$bins[2] & lat >= ranges$latmin & 
                              #lat <= ranges$latmax & lon <= ranges$lonmax & lon >= ranges$lonmin)
+
+
+
+
+
+___
+
+#hist(activeSta$., breaks = 20, main = "Stations Per Year", xlab="Year", ylab="Stations", col = 'yellow', border='white') #ylim=c(0,400),
+      )
+____
+
+
+
+
+    

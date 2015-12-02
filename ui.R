@@ -108,8 +108,10 @@ shinyUI(
           ),
           tabPanel("Eathquakes Plot", plotOutput("plot2")),
           tabPanel("Density Plot (dbscan)", 
-                   numericInput("minPts", "MinPts:", 20, min = 0, max = 1000, width='75px'),
-                   numericInput("eps", "eps:", 43, min = 0, max = 1000, width='75px'),
+                   fluidRow(
+                     div(style="display:inline-block", numericInput("minPts", "MinPts:", 20, min = 0, max = 1000, width='75px')),
+                     div(style="display:inline-block", numericInput("eps", "eps:", 43, min = 0, max = 1000, width='75px'))
+                     ),
                    plotOutput("plot4")
           ),
           tabPanel("3D Plot", plotOutput("plot5")),

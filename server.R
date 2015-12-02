@@ -235,30 +235,28 @@ shinyServer(function(input, output, clientData, session) {
     df$end <- as.Date(df$end, "%Y")
     
     mutate_each(df, funs(year(.)), start:end) -> temp
-    #DON LOOK HERE ^ and below
+    
     #active <- sapply(1:nrow(temp), function(x){
     #  seq(temp[x, 2], temp[x, 3], by = 1)}) %>%
     #  unlist %>%
     #  table %>%
     #  data.frame
-  
+    
     #activeSta$Freq used to determine active stations for given year
     
     #disabled not meaningful for factors
-#activeSta <- subset(active, . >= input$bins[1] & . <= input$bins[2] )
+    #activeSta <- subset(active, . >= input$bins[1] & . <= input$bins[2] )
     
-    
+    #Displays plot based on the selected radio button
     selectHisto <- function(histoParam){
       switch(histoParam,
              magvce = cum_function(),
              magvte = hist(plotdata2$emw, breaks = 8, main = "Num. of Events vs Magnitude", xlab="Magnitude", ylab="Events", col = 'darkblue', border='white'),
              cevt = plot(plotdata1sort2$datetime, plotdata1sort2$events, type="p", main = "Cumulative Num. of Events over Time", xlab = "Magnitude", ylab = "Cumulative Number", log="y"),
-             tevd = hist(plotdata2$depth, breaks = 20, main = "Num. of Events vs Depth", xlab = "Depth", col = 'darkorange', border='white'),
-             #svy = barplot(activeSta$Freq, names.arg = activeSta$.) 
-               #hist(activeSta$., breaks = 20, main = "Stations Per Year", xlab="Year", ylab="Stations", col = 'yellow', border='white') #ylim=c(0,400),
-      )
+             tevd = hist(plotdata2$depth, breaks = 15, main = "Num. of Events vs Depth", xlab = "Depth", col = 'darkorange', border='white')
+             #svy = barplot(activeSta$Freq, names.arg = activeSta$.)
+             )
     }
-    
     
     return (selectHisto(input$histoParam))
   })
