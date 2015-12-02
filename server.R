@@ -186,7 +186,7 @@ shinyServer(function(input, output, clientData, session) {
                              expand_limits(x=c(0,6)) + theme(text = element_text(size=18, face="bold")) + 
                              stat_smooth(aes(outfit=fit<<-..y..,outx=fitx<<-..x.., color="Loess Curve (span=0.7)"), formula=y~log(x),method="loess", se=FALSE, n = partitions, size=0.5, span = 0.7, na.rm = TRUE) +
                              stat_smooth(aes(color="Loess Curve (span=0.6)"), formula=y~log(x),method="loess", se=TRUE, size=1, span = 0.6, na.rm = TRUE) +
-                             scale_colour_manual("Key:", breaks = c("Loess Curve (span=0.7)","Loess Curve (span=0.6)", "1st Derivative (LC(s=0.7))","Mc"), values = c("blue","cyan","red","purple"))
+                             scale_colour_manual("Key:", breaks = c("Loess Curve (span=0.7)","Loess Curve (span=0.6)", "1st Der. * -1 (LC(s=0.7))","Mc"), values = c("blue","cyan","red","purple"))
       
       # Note aes(outfit=fit<<-..y..) is a hack to extract the y axis of the fit to variable "fit" ... see also fitx
       # Also note, we need to run the plot to grab the trend.
@@ -209,9 +209,10 @@ shinyServer(function(input, output, clientData, session) {
       
       # Plot derivative + Maximum
       cum_frequency_graph <- cum_frequency_graph + geom_line(data=cum_frequency_derivative, 
-                             aes(x=dX, y=log(dY), color="1st Derivative (LC(s=0.7))"), size=1, alpha=0.5, na.rm = TRUE) +
+                             aes(x=dX, y=log(dY), color="1st Der. * -1 (LC(s=0.7))"), size=1, alpha=0.5, na.rm = TRUE) +
                              geom_vline(xintercept=cum_frequency_derivative.max_pt$dX[1]) + 
-                             geom_point(data=cum_frequency_derivative.max_pt,aes(x=dX, y=dY), fill="purple", size=5, shape=25, na.rm = TRUE)
+                             geom_point(data=cum_frequency_derivative.max_pt,aes(x=dX, y=dY), fill="purple", size=5, shape=25, na.rm = TRUE) + 
+                             geom_text(data=cum_frequency_derivative.max_pt, aes(x=dX, y=dY, label=paste0("Mc = ",round(dX, digits=3))),hjust=-0.25, vjust=0.5, color="purple")
                              
       return(cum_frequency_graph) 
     }
