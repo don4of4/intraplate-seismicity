@@ -207,6 +207,8 @@ shinyServer(function(input, output, clientData, session) {
       cum_frequency_derivative <- data.frame(dX, dY, abs_max=(dY==max(dY))) %>% filter(dY>=0)
       cum_frequency_derivative.max_pt <- cum_frequency_derivative %>% filter(abs_max==TRUE)
       
+      a <- log10(length(plotdata1))
+      
       # Plot derivative + Maximum
       cum_frequency_graph <- cum_frequency_graph + geom_line(data=cum_frequency_derivative, 
                              aes(x=dX, y=log(dY), color="1st Der. * -1 (LC(s=0.7))"), size=1, alpha=0.5, na.rm = TRUE) +
