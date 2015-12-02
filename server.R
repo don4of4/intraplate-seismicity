@@ -46,6 +46,12 @@ shinyServer(function(input, output, clientData, session) {
     updateSliderInput(session, "bins", value = c(input$bins[1],input$bins[2]-1))
   })
   
+  observeEvent(input$increment_start_year, {
+    updateSliderInput(session, "bins", value = c(input$bins[1]+1,input$bins[2]))
+  })
+  observeEvent(input$decrement_start_year, {
+    updateSliderInput(session, "bins", value = c(input$bins[1]-1,input$bins[2]))
+  })
   
   #Stations Plot:
   
