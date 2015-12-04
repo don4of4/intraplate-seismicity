@@ -23,7 +23,7 @@ Magnitude conversions where requred on data from ANSS_2013.  This was the method
  - Download and install RStudio
  - If Mac:  Download and install XQuartz
  -          Open Terminal
- -          Type 'git clone https://github.com/don4of4/intraplate-seismicity.git' without the parentheses
+ -          Type 'git clone https://github.com/don4of4/intraplate-seismicity.git' without the quotes
  -          enter Github User and Password
 
 ####Execution:
@@ -36,10 +36,24 @@ Magnitude conversions where requred on data from ANSS_2013.  This was the method
 ####Updating:
  - Open Terminal
  - Navigate to intraplate-seismicity
- - type 'git pull' without the parentheses
- - 
+ - type 'git pull' without the quotes
  
-####Troubleshooting:
+####Troubleshoot•	
+ - 'Error: There is no package called ShinyRGL' – This error is indicative that XQuartz is not installed on Mac. If you just installed it, restart your R session. You should not recieve this error on PC.
+ - 'Error: object ‘dataset’ not found' – This error is indicative that you have not executed your import.R file. Stop the program execution, highlight contents of import.R, and execute the program. 
 
-#####Error: There is no package called ShinyRGL.
-This error is indicative that XQuartz is not installed on mac.  If you just installed it, restart your R session.  You should not recieve this error on PC.
+####Directory Structure:
+intraplate-seismicity
+├──  data/
+│   ├──  //Data sources here
+├──  docs/
+│   ├──  ExceptionReport.docx
+├──  app.Rproj
+├──  import.R
+├──  LICENSE
+├──  README.md
+├──  server.R
+├──  stations_completeness_validation.R
+├──  stations_date_validation.R
+├──  ui.R
+├──  util.R
