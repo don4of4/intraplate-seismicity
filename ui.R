@@ -81,8 +81,7 @@ shinyUI(
                                       c("Cumulative Events vs Magnitude" = "magvce",
                                         "Num. of Events vs Magnitude" = "magvte",
                                         "Cumulative Events over Time" = "cevt",
-                                        "Num. of Events vs Depth" = "tevd",
-                                        "Stations vs Year" = "svy"),
+                                        "Num. of Events vs Depth" = "tevd"),
                                       selected="magvce", inline=FALSE)),
         br(), br(),
         
