@@ -33,7 +33,7 @@ shinyUI(
         sliderInput("bins",
                     "Time:",
                     min = 1800,
-                    max = 2015,
+                    max = 2016,
                     value = c(1800,2015),
                     sep = "",
                     step=5)
@@ -51,8 +51,10 @@ shinyUI(
         actionButton("increment_end_year", "End-date +1ys"),
         actionButton("decrement_start_year", "Start-date -1ys"),
         actionButton("increment_start_year", "Start-date +1ys"),
-        
         br(), br(),
+        
+        numericInput("lower_year_bound", "Min Slider Value:", 1800, min = 1000, max = 2015, width='175px'),
+        
         
         h4("Set Region"),
         h6("Manually enter coordinates to display"),
@@ -105,7 +107,7 @@ shinyUI(
                      )
                    )
           ),
-          tabPanel("Eathquakes Plot", plotOutput("plot2")),
+          tabPanel("Earthquakes Plot", plotOutput("plot2")),
           tabPanel("Density Plot (dbscan)", 
                    fluidRow(
                      div(style="display:inline-block", numericInput("minPts", "MinPts:", 20, min = 0, max = 1000, width='75px')),

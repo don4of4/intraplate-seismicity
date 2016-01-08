@@ -18,10 +18,16 @@ stations.iris <- read.table("data/all_stn_metadata_oct15", header = FALSE, sep =
 colnames(stations.iris) <- c("net","sta","loc","chan","lat","lon","elev","depth","azimuth","dip","instrument","scale","scalefreq","scaleunits","samplerate","start","end")
 data.anss$network <- 'IRIS'
 
-# ISC magnitude data
-data.small_mag <- read.table("data/small_mag_ISC_75_2012.txt", header = TRUE, sep = "\t")
-colnames(data.small_mag) <- c("eventid", "author", "date","time", "lat","lon", "depth","depfix","magauthor","magtype","mag", "magauthor2", "magtype2", "mag2", "magauthor3", "magtype3", "mag3")
+# ISC small magnitude data
+data.small_mag <- read.table("data/small_mag.txt", header = TRUE, sep = ",")
+colnames(data.small_mag) <- c("datetime","lat","lon","depth","mag","magtype","nbstations", "gap", "distance", "rms", "source", "eventid")
 data.small_mag$src <- 'Small_Mag'
+data.small_mag$declustered <- FALSE
+
+# ANF data import
+data.anf <- read.table("data/ANF_06_15.txt", header = FALSE, sep = "")
+colnames(data.anf) <- c('date','time','lon','lat','depth','emw','eventid')
+data.small_mag$src <- 'ANF'
 data.small_mag$declustered <- FALSE
 
 # ISC arrivals data
@@ -32,36 +38,71 @@ data.arrivals$datetime <- strptime(paste0(data.arrivals$DATE, "T", data.arrivals
 options(digits.secs=3)
 data.neic$datetime <- ISOdatetime(data.neic$y, data.neic$m, data.neic$d, data.neic$h, data.neic$m.1, data.neic$s, tz = "")
 data.anss$datetime <- as.POSIXct(data.anss$datetime, tz = "")
+data.small_mag$datetime <- as.POSIXct(strptime(data.small_mag$datetime, format="%Y/%m/%d %H:%M:%OS"))
+data.anf$datetime <- as.POSIXct(strptime(paste0(data.anf$date, " ",data.anf$time), format="%m/%d/%Y %H:%M:%OS"))
 stations.iris$start <- strptime(stations.iris$start,format="%Y-%m-%dT%H:%M:%OS")
 stations.iris$end <- strptime(stations.iris$end,format="%Y-%m-%dT%H:%M:%OS")
-data.small_mag$datetime <- paste0(data.small_mag$date, "T", data.small_mag$time)
+
+# Strip leftover date/time metadata
+data.anf$date <- data.anf$time <- NULL
 
 # Rename lon and lat
 data.neic$y <- data.neic$m <- data.neic$d <- data.neic$h <- data.neic$m.1 <- data.neic$s <- NULL
 
+# NA Depth is intepreted as 0
+data.anss$depth[is.na(data.anss$depth)] <- 0
+data.small_mag$depth[is.na(data.small_mag$depth)] <- 0
+data.anf$depth[is.na(data.anf$depth)] <- 0
+
 
 ## Magnitude to Mw
 
-# Check event zone.
-data.anss$f_NE <- ifelse(data.anss$lat > -0.45*data.anss$lon + 3, 1, 0)
-data.anss$f_1997GSC <- ifelse(data.anss$lat > -0.45*data.anss$lon + 3, 1, 0)
-data.anss$f_1982NE <- ifelse(data.anss$NE == 1 && data.anss$source != 'GSC' && format(data.anss$datetime, "%Y") < 1982, 1, 0)
+# Check event zone: This function is reusable, simply ensure needed variables are present. (datetime,source,lat,lon)
+  check_event_zone <- function(data_in){
+    data_in$f_NE <- ifelse(data_in$lat > -0.45*data_in$lon + 3, 1, 0)
+    data_in$f_1997GSC <- ifelse(data_in$lat > -0.45*data_in$lon + 3, 1, 0)
+    data_in$f_1982NE <- ifelse(data_in$f_NE == 1 && data_in$source != 'GSC' && format(data_in$datetime, "%Y") < 1982, 1, 0)
+    return(data_in)
+  }
+
+data.anss <- check_event_zone(data.anss)
+data.small_mag <- check_event_zone(data.small_mag)
+
 
 # Magnitude conversion
-data.anss$emw <- ifelse(data.anss$magtype == "ML", 0.806*data.anss$mag + 0.633,
-                 ifelse(data.anss$magtype == "Mb", data.anss$mag - 0.316 - 0.118*data.anss$f_NE - 0.192*data.anss$f_1997GSC + 0.280*data.anss$f_1982NE,
-                 ifelse(data.anss$magtype == "Md", 0.806*data.anss$mag + 0.633,
-                 ifelse(data.anss$magtype == "Mx", -1,
-                 ifelse(data.anss$magtype == "Mh", -1,
-                 ifelse(data.anss$magtype == "Mc",0.806*data.anss$mag + 0.633,
-                 ifelse(data.anss$magtype == "Unk", -1, -2)))))))
+  convert_mag <- function(data){
+    data$emw <- ifelse(data$magtype == "ML", 0.806*data$mag + 0.633,
+                     ifelse(data$magtype == "Mb", data$mag - 0.316 - 0.118*data$f_NE - 0.192*data$f_1997GSC + 0.280*data$f_1982NE,
+                     ifelse(data$magtype == "Md", 0.806*data$mag + 0.633,
+                     ifelse(data$magtype == "Mx", -1,
+                     ifelse(data$magtype == "Mh", -1,
+                     ifelse(data$magtype == "Mc", 0.806*data$mag + 0.633,
+                     ifelse(data$magtype == "Unk", -1, -2)))))))
+    data$mag <- data$magtype <- NULL # Cleanup source
+    return(data)
+  }
 
-# Filter out tuples with unknown mag
+data.anss <- convert_mag(data.anss)
+data.small_mag <- convert_mag(data.small_mag)
+
+# Strip the helper information from check_event_zone
+  cleanup_emw_conversion <- function(data){
+    data$f_NE <- data$f_1997GSC <- data$f_1982NE <- NULL
+    return(data)
+  }
+
+data.anss <- cleanup_emw_conversion(data.anss)
+data.small_mag <- cleanup_emw_conversion(data.small_mag)
+
+# Filter out tuples with unknown mag-
 data.anss <- subset(data.anss, data.anss$emw > 0)
+data.small_mag <- subset(data.small_mag, data.small_mag$emw > 0)
+data.anf <- subset(data.anf, data.anf$emw > 0)
 
-# Filter out based on lat and long
-m <- dplyr::bind_rows(data.neic, data.anss)
-dataset <- subset(m, lat >= 35.5 & lat <= 43.5 & lon <= -71 & lon >= -84)
+# Filter out based on lat and long  
+# ANF EXCLUDED.  To insert put data.anf below
+dataset <- dplyr::bind_rows(data.neic, data.anss, data.small_mag,data.anf ) # May coerce factors to char, this is okay.
+
 
 # States within the region
 target_states <- c( "pennsylvania", "new york", "new jersey", "virginia", "kentucky","rhode island",

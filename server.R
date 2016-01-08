@@ -53,6 +53,9 @@ shinyServer(function(input, output, clientData, session) {
   observeEvent(input$decrement_start_year, {
     updateSliderInput(session, "bins", value = c(input$bins[1]-1,input$bins[2]))
   })
+  observeEvent(input$lower_year_bound, {
+    updateSliderInput(session, "bins", min=input$lower_year_bound)
+  })
   
   #Stations Plot:
   
@@ -63,14 +66,13 @@ shinyServer(function(input, output, clientData, session) {
                            & lat >= input$manlatmin & lat <= input$manlatmax 
                            & lon <= input$manlonmax & lon >= input$manlonmin)
     pp <- ggplot() +
-      geom_polygon(aes(long,lat, group=group), fill="palegreen3", colour="grey60", data=county) +
+      geom_polygon(aes(long,lat, group=group), fill="#a3dca3", colour="#a6a6a6", data=county) +
       geom_polygon( data=states, aes(x=long, y=lat, group = group),colour="royalblue4", fill=NA) +
-      annotate("rect", xmin=-84, xmax=-71, ymin=35.5, ymax=43.5, colour="black", size=1, fill="blue", alpha="0.01") +
+      geom_abline(intercept = 3, slope = -.45, color = "#cc99ff", size = 1) +
+      annotate("rect", xmin=input$manlonmin, xmax=input$manlonmax, ymin=input$manlatmin, ymax=input$manlatmax, colour="black", size=1, fill="blue", alpha="0.01") +
       geom_point(data=plotstations, size=4, alpha = .7, aes(x=lon, y=lat), color="yellow", shape=17) +
-      #geom_point(data=plotdata, size=3, alpha = .7, aes(x=lon, y=lat, color=emw)) + #was out
-      #scale_color_gradient(low="blue", high="red") + #was out
-      theme(plot.background = element_rect(fill = 'grey')) +
-      geom_abline(intercept = 3, slope = -.45, color = "grey", size = 1)
+      theme(plot.background = element_rect(fill = 'grey'))
+      
     
     print(pp)
     
@@ -101,15 +103,16 @@ shinyServer(function(input, output, clientData, session) {
                        & lat <= input$manlatmax & lat >= input$manlatmin
                        & lon <= input$manlonmax & lon >= input$manlonmin)
     
+    
     pp <- ggplot() +
-      geom_polygon(aes(long,lat, group=group), fill="palegreen3", colour="grey60", data=county) +
+      geom_polygon(aes(long,lat, group=group), fill="#a3dca3", colour="#a6a6a6", data=county) +
       geom_polygon( data=states, aes(x=long, y=lat, group = group),colour="royalblue4", fill=NA) +
-      annotate("rect", xmin=-84, xmax=-71, ymin=35.5, ymax=43.5, colour="black", size=1, fill="blue", alpha="0.01") +
-      #annotate("rect", xmin=input$manlonmin, xmax=input$manlonmax, ymin=input$manlatmin, ymax=input$manlatmax, colour="black", size=1, fill="blue", alpha="0.01") +
+      geom_abline(intercept = 3, slope = -.45, color = "#cc99ff", size = 1) +
+      annotate("rect", xmin=input$manlonmin, xmax=input$manlonmax, ymin=input$manlatmin, ymax=input$manlatmax, colour="black", size=1, fill="blue", alpha="0.01") +
       geom_point(data=plotdata, size=2, alpha = .7, aes(x=lon, y=lat, color=emw)) +
-      scale_color_gradient(low="blue", high="red") +
-      theme(plot.background = element_rect(fill = 'grey')) +
-      geom_abline(intercept = 3, slope = -.45, color = "grey", size = 1)
+      scale_colour_gradientn(limits=c(1,6), colours=c("#540C8C","#1E0EFB","#FDFA00","#F8AF00","#F41F00")) + 
+      theme(plot.background = element_rect(fill = 'grey')) 
+      
     
     print(pp)
   })
