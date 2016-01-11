@@ -1,5 +1,5 @@
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load("shiny","datasets","ggplot2","scatterplot3d","ks","fpc","dplyr","lubridate","stats","scales","base")
+pacman::p_load("shiny","datasets","ggplot2","scatterplot3d","ks","fpc","dplyr","lubridate","stats","scales","base","mapproj")
  
 
 shinyServer(function(input, output, clientData, session) {
@@ -64,13 +64,13 @@ shinyServer(function(input, output, clientData, session) {
     plotstations <- subset(stations.iris, as.numeric(format(start, "%Y")) >= input$bins[1] & as.numeric(format(start, "%Y")) <= input$bins[2] 
                            & lat >= input$manlatmin & lat <= input$manlatmax 
                            & lon <= input$manlonmax & lon >= input$manlonmin)
-    pp <- ggplot() +
+    pp <- ggplot() + coord_map() +
       geom_polygon(aes(long,lat, group=group), fill="#a3dca3", colour="#a6a6a6", data=county) +
-      geom_polygon( data=states, aes(x=long, y=lat, group = group),colour="royalblue4", fill=NA) +
+      geom_polygon(data=states, aes(x=long, y=lat, group = group),colour="royalblue4", fill=NA) +
       geom_abline(intercept = 3, slope = -.45, color = "#cc99ff", size = 1) +
-      annotate("rect", xmin=input$manlonmin, xmax=input$manlonmax, ymin=input$manlatmin, ymax=input$manlatmax, colour="black", size=1, fill="blue", alpha="0.01") +
+      annotate("rect", xmin=input$manlonmin, xmax=input$manlonmax, ymin=input$manlatmin, ymax=input$manlatmax, colour="black", size=1, fill=NA, alpha=".5") +
       geom_point(data=plotstations, size=4, alpha = .7, aes(x=lon, y=lat), color="yellow", shape=17) +
-      theme(plot.background = element_rect(fill = 'grey'))
+      theme(plot.background = element_rect(fill = 'grey')) + scale_x_continuous("Longitude") + scale_y_continuous("Latitude")
       
     
     print(pp)
@@ -103,14 +103,14 @@ shinyServer(function(input, output, clientData, session) {
                        & lon <= input$manlonmax & lon >= input$manlonmin)
     
     
-    pp <- ggplot() +
+    pp <- ggplot() + coord_map() +
       geom_polygon(aes(long,lat, group=group), fill="#a3dca3", colour="#a6a6a6", data=county) +
       geom_polygon( data=states, aes(x=long, y=lat, group = group),colour="royalblue4", fill=NA) +
       geom_abline(intercept = 3, slope = -.45, color = "#cc99ff", size = 1) +
-      annotate("rect", xmin=input$manlonmin, xmax=input$manlonmax, ymin=input$manlatmin, ymax=input$manlatmax, colour="black", size=1, fill="blue", alpha="0.01") +
+      annotate("rect", xmin=input$manlonmin, xmax=input$manlonmax, ymin=input$manlatmin, ymax=input$manlatmax, colour="black", size=1, fill=NA, alpha="0.5") +
       geom_point(data=plotdata, size=2, alpha = .7, aes(x=lon, y=lat, color=emw)) +
       scale_colour_gradientn(limits=c(1,6), colours=c("#540C8C","#1E0EFB","#FDFA00","#F8AF00","#F41F00")) + 
-      theme(plot.background = element_rect(fill = 'grey')) 
+      theme(plot.background = element_rect(fill = 'grey')) + scale_x_continuous("Longitude") + scale_y_continuous("Latitude")
       
     
     print(pp)
