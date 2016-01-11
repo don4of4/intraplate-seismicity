@@ -1,5 +1,5 @@
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load("shiny", "rstudioapi")
+pacman::p_load("shiny", "rstudioapi", "shinyRGL")
 
 # This is the user-interface definition of a Shiny web application.
 # You can find out more about building applications with Shiny here:
@@ -9,7 +9,7 @@ pacman::p_load("shiny", "rstudioapi")
 
 # slider - slider is time, time slider throughout bounds. 1900 -> Present
 # graph - graph is all points plotted, updates everytime slider is moved
-# shows points where date is <= time (or use range slider)
+# shows points where date is<= time (or use range slider)
 # one slider, two graphs
 # graph1 - all points plotted including line (lat and long + dots & mag color)
 # graph2 - cluster analysis on graph (kmedoids clustering on it)
@@ -80,10 +80,13 @@ shinyUI(
                          h4("Generate Statistics")),
         conditionalPanel(condition="input.tabs == 'Statistics'",
                          radioButtons("histoParam", "Select Graph:",
-                                      c("Cumulative Events vs Magnitude" = "magvce",
-                                        "Num. of Events vs Magnitude" = "magvte",
-                                        "Cumulative Events over Time" = "cevt",
-                                        "Num. of Events vs Depth" = "tevd"),
+                                      c(
+                                        '[G] Cumulative Events & Magnitude' = "magvce",
+                                        '[G] Cumulative Events & Time' = "cevt",
+                                        '[H] Stations vs Year' = "stations_vs_year",
+                                        '[H] Num. of Events vs Depth' = "tevd",
+                                        '[H] Num. of Events vs Magnitude' = "magvte"
+                                        ),
                                       selected="magvce", inline=FALSE)),
         br(), br(),
         
@@ -119,8 +122,7 @@ shinyUI(
           tabPanel("Statistics", plotOutput("histoPlot")),
           id="tabs"
         ), #end tab panel definitions
-        
-        column(10, h3(textOutput("caption")), offset=1)
+        htmlOutput("caption")
       )
     )
 

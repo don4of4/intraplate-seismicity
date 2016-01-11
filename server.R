@@ -1,7 +1,6 @@
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load("shiny","datasets","ggplot2","scatterplot3d","ks","fpc","dplyr","lubridate","stats","base")
-
-
+pacman::p_load("shiny","datasets","ggplot2","scatterplot3d","ks","fpc","dplyr","lubridate","stats","scales","base")
+ 
 
 shinyServer(function(input, output, clientData, session) {
   
@@ -21,23 +20,23 @@ shinyServer(function(input, output, clientData, session) {
     #Determine units and correct quantity to insert into caption
     captionUnit <- function(selectedTab, histo){
       unit <- " events"
-      if (selectedTab == "Stations Plot" || ( selectedTab == "Statistics" & histo == 'svy')){unit <- " stations" }
+      if (selectedTab == "Stations Plot" || ( selectedTab == "Statistics" & histo == 'stations_vs_year')){unit <- " Stations" }
       return(unit)
     }
     captionQuant <- function(selectedTab, histo){
       quant <- nrow(plotdata)
-      if (selectedTab == "Stations Plot" || ( selectedTab == "Statistics" & histo == 'svy')){quant <- nrow(deduped.plotstations)}
+      if (selectedTab == "Stations Plot" || ( selectedTab == "Statistics" & histo == 'stations_vs_year')){quant <- nrow(deduped.plotstations)}
       return(quant)
-    }
+    } 
     
     
     #Formatted caption with proper quant & unit variable values
-    paste(input$bins[1], '-',input$bins[2], ' <=> ', captionQuant(input$tabs, input$histoParam), captionUnit(input$tabs, input$histoParam))
+    paste(captionQuant(input$tabs, input$histoParam), captionUnit(input$tabs, input$histoParam), " from ", input$bins[1], '-',input$bins[2] )
   }) 
   
   # Return as text the selected variables
-  output$caption <- renderText({
-    text()
+  output$caption <- renderUI({
+    HTML(paste("<h3 style='text-align:center'>", text(), "</h3>"))
   })
   
   observeEvent(input$increment_end_year, {
@@ -150,16 +149,26 @@ shinyServer(function(input, output, clientData, session) {
   output$histoPlot <-  renderPlot({ 
     options( warn = 0 )
     
-    #For histogram CE & histogram TE vs depth & Mag vs TE
-    plotdata1 <- plotdata2 <- subset(dataset, as.numeric(format(datetime, "%Y")) >= input$bins[1] & as.numeric(format(datetime, "%Y")) <= input$bins[2]
+    first_year <- input$bins[1]
+    last_year <- input$bins[2]
+      
+    plotdata <- plotdata2 <- subset(dataset, as.numeric(format(datetime, "%Y")) >= first_year & as.numeric(format(datetime, "%Y")) <= last_year
       & lat <= input$manlatmax & lat >= input$manlatmin
       & lon <= input$manlonmax & lon >= input$manlonmin)
-  
-    # --> Cum. Number mag
-    plotdata1sort <- plotdata1[with(plotdata1, order(-emw)), ]
-    plotdata1sort$events <- seq.int(nrow(plotdata1sort))
     
-    cum_function <- function(){ 
+    plotstations <- subset(stations.iris, 
+                           as.numeric(format(start, "%Y")) >= input$bins[1]
+                           & as.numeric(format(start, "%Y")) <= input$bins[2]
+                           & as.numeric(format(end, "%Y")) >= input$bins[2]
+                           & lat <= input$manlatmax & lat >= input$manlatmin
+                           & lon <= input$manlonmax & lon >= input$manlonmin)
+  
+    
+    cum_frequency.mag.graph <- function(plotdata1){ 
+      
+      # --> Cum. Number mag
+      plotdata1sort <- plotdata1[with(plotdata1, order(-emw)), ]
+      plotdata1sort$events <- seq.int(nrow(plotdata1sort))
    
       # Use dplyr pipelining  %>% to query the data
       # Merges events of identical emw and counts them by that group.
@@ -221,46 +230,78 @@ shinyServer(function(input, output, clientData, session) {
                              
       return(cum_frequency_graph) 
     }
-    # --> CE by time
-    plotdata1sort2 <- plotdata1[with(plotdata1, order(datetime)), ]
-    plotdata1sort2$events <- seq.int(nrow(plotdata1sort))
-
-    #For stations/year graph
-    #-> grads stations within the geo boundaries, that are active
-    plotstations <- subset(stations.iris, 
-                           as.numeric(format(start, "%Y")) >= input$bins[1]
-                             & as.numeric(format(start, "%Y")) <= input$bins[2]
-                             & as.numeric(format(end, "%Y")) >= input$bins[2]
-                             & lat <= input$manlatmax & lat >= input$manlatmin
-                             & lon <= input$manlonmax & lon >= input$manlonmin)
-
-    #-> creates a dataframe with formatted station, start and end, without duplicates
-    df <- plotstations[,c('sta','start', 'end')]
-    df$start <- as.Date(df$start, "%Y")
-    df$end <- as.Date(df$end, "%Y")
     
-    mutate_each(df, funs(year(.)), start:end) -> temp
     
-    #active <- sapply(1:nrow(temp), function(x){
-    #  seq(temp[x, 2], temp[x, 3], by = 1)}) %>%
-    #  unlist %>%
-    #  table %>%
-    #  data.frame
+    cum_frequency.time.graph <- function(plotdata){
+      
+      # Sort by time
+      plotdata.sorted <- plotdata[with(plotdata, order(datetime)), ]
+      
+      # Add the cum. count to each row in order.
+      plotdata.sorted$events <- seq.int(nrow(plotdata.sorted))
+      
+      cum_events_over_time.plot <- plot(plotdata.sorted$datetime, plotdata.sorted$events, type="p", main = "Cumulative Num. of Events over Time", 
+                                         xlab = "Time", ylab = "Cumulative Number", log="y")
+      return(cum_events_over_time.plot)
+    }
     
-    #activeSta$Freq used to determine active stations for given year
+    stations.year.hist <- function(plotstations, first_year, last_year){
+      # (1) Place the data into a dataframe and convert the date
+      plotstations$start <- as.Date(plotstations$start)
+      plotstations$end <- as.Date(plotstations$end)
+      
+      # (2) Add additional col's simplifying the start and end year to only the year
+      # (3) Group the stations by station name and start/end date (year only)
+      # (4) Remove duplicates. Now we are left with duplicate rows for each station due to different channels OR gaps
+      # (5) Select only the variables we want.
+      
+      station_data <- plotstations %>% mutate(start_year=year(start), end_year=ifelse(year(end) > year(Sys.Date()), year(Sys.Date()), year(end)) ) %>% 
+        group_by(sta, start_year, end_year) %>% distinct() %>% select(sta, start_year, end_year)
+      
+      validate(
+        need(length(station_data$sta) > 0, "No stations active in this time period.")
+      )
+      
+      # (6) Iterate the station_data, expanding the date sequence, exploding it, then summarizing it to a freq. table.
+        # Ineffecient way: do(data.frame(sta=.$sta, year=seq(from=.$start_year, to=.$end_year, by=1))) %>% select(sta, year) %>% distinct()
+      # Fast way below.
+      station_summary <- sapply(1:nrow(station_data), function(x){seq(station_data$start_year[x], station_data$end_year[x], by = 1)}) %>%
+        unlist %>% data.frame(year=.) %>% filter(year >= first_year, year <= last_year) 
+      
+      freq_dist <- station_summary %>% group_by(year) %>% summarise(freq=n())
+     
+      validate(
+        need(length(station_summary$year) > 0, "No stations with your parameters active in this time period.")
+      )
+      
+      graph <- ggplot(station_summary, aes(x=year)) + geom_histogram(aes(fill=..count..), binwidth=1, colour="black") +
+              coord_cartesian(xlim=c(min(station_summary$year), last_year+1), ylim=c(0,max(freq_dist$freq)+10)) +
+              scale_y_continuous("Number of Stations", breaks=pretty_breaks(n=5)) +
+              scale_x_continuous("Year", breaks=seq(min(station_summary$year),max(station_summary$year),5), 
+                                 minor_breaks=seq(min(station_summary$year),max(station_summary$year),1)) +
+              scale_fill_gradient("Count", low = "yellow", high = "green")
+      return (graph)
+      
+    }
     
-    #disabled not meaningful for factors
-    #activeSta <- subset(active, . >= input$bins[1] & . <= input$bins[2] )
+    events.depth.hist <- function(plotdata){
+      return (hist(plotdata$depth, breaks = 15, main = "Num. of Events vs Depth", xlab = "Depth", col = 'darkorange', border='white'))
+    }
+    events.mag.hist <- function(plotdata){
+      return (hist(plotdata$emw, breaks = 8, main = "Num. of Events vs Magnitude", xlab="Magnitude", ylab="Events", col = 'darkblue', border='white'))
+    }
     
     #Displays plot based on the selected radio button
     selectHisto <- function(histoParam){
       switch(histoParam,
-             magvce = cum_function(),
-             magvte = hist(plotdata2$emw, breaks = 8, main = "Num. of Events vs Magnitude", xlab="Magnitude", ylab="Events", col = 'darkblue', border='white'),
+             magvce = cum_frequency.mag.graph(plotdata),
+             cevt = cum_frequency.time.graph(plotdata),
+             
              #magvte = plot(plotdata2$emw, log="y", type='h', lwd=10, lend=2, main = "Num. of Events vs Magnitude", xlab="Magnitude", ylab="Events", col = 'darkblue', border='white'),
-             cevt = plot(plotdata1sort2$datetime, plotdata1sort2$events, type="p", main = "Cumulative Num. of Events over Time", xlab = "Time", ylab = "Cumulative Number", log="y"),
-             tevd = hist(plotdata2$depth, breaks = 15, main = "Num. of Events vs Depth", xlab = "Depth", col = 'darkorange', border='white')
-             #svy = barplot(activeSta$Freq, names.arg = activeSta$.)
+            
+             tevd = events.depth.hist(plotdata),
+             magvte = events.mag.hist(plotdata),
+             stations_vs_year = stations.year.hist(plotstations,first_year,last_year)
              )
     }
     
