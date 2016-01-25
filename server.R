@@ -126,8 +126,7 @@ shinyServer(function(input, output, clientData, session) {
     calc_coordinates=with(plotdata,data.frame(Longitude=lon*100,Latitude=lat*100,Depth=depth))
     model=dbscan(calc_coordinates,MinPts=input$minPts,eps=input$eps)
     clusters=predict(model,calc_coordinates)+1
-    with(coordinates,scatterplot3d(x=Longitude,y=Latitude,z=-Depth,color=clusters))
-    
+    with(coordinates,scatterplot3d(x=Longitude,y=Latitude,z=-Depth,color=clusters, cex.lab=1.5,pch=20,font.axis=2))
   })
   
   #3D Plot:
@@ -140,7 +139,6 @@ shinyServer(function(input, output, clientData, session) {
     precision=50
     d<<-kde(calc_coordinates,compute.cont=TRUE,gridsize=c(precision,precision,precision))
     plot(d,cont=(1:5)*1/5*100,drawpoints=TRUE) 
-    
   })
   
   
