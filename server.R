@@ -121,12 +121,12 @@ shinyServer(function(input, output, clientData, session) {
     plotdata <- subset(dataset, as.numeric(format(datetime, "%Y")) >= input$bins[1] & as.numeric(format(datetime, "%Y")) <= input$bins[2] 
                        & lat <= input$manlatmax & lat >= input$manlatmin
                        & lon <= input$manlonmax & lon >= input$manlonmin)
-  
-    coordinates=with(plotdata,data.frame(long=lon,lat=lat,depth=depth))
-    calc_coordinates=with(plotdata,data.frame(long=lon*100,lat=lat*100,depth=depth))
+    coordinates=with(plotdata,data.frame(Longitude=lon,Latitude=lat,Depth=depth))
+    
+    calc_coordinates=with(plotdata,data.frame(Longitude=lon*100,Latitude=lat*100,Depth=depth))
     model=dbscan(calc_coordinates,MinPts=input$minPts,eps=input$eps)
     clusters=predict(model,calc_coordinates)+1
-    with(coordinates,scatterplot3d(x=long,y=lat,z=-depth,color=clusters))
+    with(coordinates,scatterplot3d(x=Longitude,y=Latitude,z=-Depth,color=clusters))
     
   })
   
@@ -136,7 +136,7 @@ shinyServer(function(input, output, clientData, session) {
                        & lat <= input$manlatmax & lat >= input$manlatmin
                        & lon <= input$manlonmax & lon >= input$manlonmin)
   
-    calc_coordinates=with(plotdata,data.frame(long=lon*100,lat=lat*100,depth=-depth))
+    calc_coordinates=with(plotdata,data.frame(Longitude=lon,Latitude=lat,Depth=-depth))
     precision=50
     d<<-kde(calc_coordinates,compute.cont=TRUE,gridsize=c(precision,precision,precision))
     plot(d,cont=(1:5)*1/5*100,drawpoints=TRUE)
