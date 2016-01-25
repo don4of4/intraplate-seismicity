@@ -70,7 +70,7 @@ shinyServer(function(input, output, clientData, session) {
       geom_abline(intercept = 3, slope = -.45, color = "#cc99ff", size = 1) +
       annotate("rect", xmin=input$manlonmin, xmax=input$manlonmax, ymin=input$manlatmin, ymax=input$manlatmax, colour="black", size=1, fill=NA, alpha=".5") +
       geom_point(data=plotstations, size=4, alpha = .7, aes(x=lon, y=lat), color="yellow", shape=17) +
-      theme(plot.background = element_rect(fill = 'grey')) + scale_x_continuous("Longitude") + scale_y_continuous("Latitude")
+      theme(plot.background = element_rect(fill = 'grey'), text = element_text(size=18, face="bold")) + scale_x_continuous("Longitude") + scale_y_continuous("Latitude")
       
     
     print(pp)
@@ -110,7 +110,7 @@ shinyServer(function(input, output, clientData, session) {
       annotate("rect", xmin=input$manlonmin, xmax=input$manlonmax, ymin=input$manlatmin, ymax=input$manlatmax, colour="black", size=1, fill=NA, alpha="0.5") +
       geom_point(data=plotdata, size=2, alpha = .7, aes(x=lon, y=lat, color=emw)) +
       scale_colour_gradientn(limits=c(1,6), colours=c("#540C8C","#1E0EFB","#FDFA00","#F8AF00","#F41F00")) + 
-      theme(plot.background = element_rect(fill = 'grey')) + scale_x_continuous("Longitude") + scale_y_continuous("Latitude")
+      theme(plot.background = element_rect(fill = 'grey'), text = element_text(size=18, face="bold")) + scale_x_continuous("Longitude") + scale_y_continuous("Latitude") 
       
     
     print(pp)
@@ -139,7 +139,7 @@ shinyServer(function(input, output, clientData, session) {
     calc_coordinates=with(plotdata,data.frame(Longitude=lon,Latitude=lat,Depth=-depth))
     precision=50
     d<<-kde(calc_coordinates,compute.cont=TRUE,gridsize=c(precision,precision,precision))
-    plot(d,cont=(1:5)*1/5*100,drawpoints=TRUE)
+    plot(d,cont=(1:5)*1/5*100,drawpoints=TRUE) 
     
   })
   
