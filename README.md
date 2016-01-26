@@ -3,7 +3,7 @@ An exploration of intraplate seismicity in the northeast USA.
 
 ####Table of contents:
 * [Catalog Sources](#catalog-sources)
-* [Installation & Setup](#installation-&-setup)
+* [Installation and Setup](#installation-and-setup)
 * [Execution](#execution)
 * [Updating](#updating)
 * [Troubleshooting](#troubleshooting)
@@ -25,7 +25,7 @@ Magnitude conversions where requred on data from ANSS_2013.  This was the method
 
 *Where the "dashed line" is the function:* `f(lat) = -0.45*lon + 3`
  
-####Installation & Setup
+####Installation and Setup
  - Download and install R
  - Download and install RStudio
  - If Mac:  Download and install XQuartz
@@ -95,11 +95,10 @@ The statistics graphs can be found by clicking on the "Statistics" tab then the 
  - Num. of Events vs Depth accurately depicts the events that occured at given depths, clearly skewed right due to the significant number of recorded events without magnitude.
  - Num. of Events vs Magnitude lists the recorded events for each magnitude in one half increments from 0.5 to 6.
 
-####How to add/update catalogs:
-To add/update a catalog, follow the steps below:
-
-1. Open `import.R` (for directions on how to do this, see the "Execution" section of the README.
-2. Note the commented text, prefaced by a `#`. This will outline each existing dataset, their file location, and the labeling of the dataset's columns and source. To add a dataset, follow the syntax below:
+####How to add a dataset:
+To add a catalog, follow the steps below:
+  - Open `import.R` (for directions on how to do this, see the "Execution" section of the README).
+  - Note the commented text, prefaced by a `#`. This will outline each existing dataset, their file location, and the labeling of the dataset's columns and source. To add a dataset, follow the syntax below:
   ```
 data.NAME <- read.table("data/SRC", header = TRUE, sep = ",")
 colnames(data.NAME) <- c("C1","C2","C3","C4*",...)
@@ -115,11 +114,13 @@ data.NAME$declustered <- TRUE|FALSE
   - If necessary, you might need to utilize the `#Magnitude conversion` section in order to standardize your data's magnitudes to Moment Magnitude.
   - That's it! Once you test and ensure yoru code runs smoothly, be sure to `git commit --all` and `git push` in order to save your work. You should do this via the command line (Terminal for Mac) or via the [Github Deskktop](https://desktop.github.com/) application.
 
-3. To modify a dataset:
+####How to modify a dataset
+To modify a dataset:
   - Find the dataset you wish to modify in the `/data/` directory. 
   - Add the new dataset to this folder. For example, add NEIC_HM_2016.csv into the directory. 
   - Go to the code (`import.R`) and modify the line of code `data.neic <- read.table("data/NEIC_HM_2016.csv", header = TRUE, sep = ",")`
     - Note that we are now pointing to NEIC_HM_2016.csv. 
+    - For directions on how to navigate to `R import.R`, see the "Execution" section of the README
   - Open the new CSV and verify that the column names directly associate with last year's data
     - i.e. `c("emw","lon","lat","depth","y","m","d", "h", "m.1", "s", "mwsig", "nstar","comment")`
   - If they do not, simply manipulate the above line in order to match the new column format. For example, if "emw" is now listed last, simply re-order in order to reflect the change.
