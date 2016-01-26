@@ -2,14 +2,27 @@
 An exploration of intraplate seismicity in the northeast USA.
 
 ####Table of contents:
-* [Catalog sources](#catalog-sources)
+* [Catalog Sources](#catalog-sources)
+* [Magnitude Conversions](#mag-conversions)
+* [Installation & Setup](#install-setup)
+* [Execution](#execution)
+* [Updating](#update)
+* [Troubleshooting](#troubleshoot)
+* [Directory Structure](#structure)
+* [How to use the software](#use)
+  * [Stations Plot](#tab1)
+  * [Earthquakes Plot](#tab2)
+  * [Density Plot (dbscan)](#tab3)
+  * [3D Plot](#tab4)
+  * [Statistics](#tab5)
 
-####Catalog sources:
- - HM_2014 (flle: 2014_NEIC_declustered.c4; includes historic and event until 2012)
- - ANSS_2013 (file: anss; includes all mag events 2013 until jun 30, 2015)
- - Small_mag (file: small_mag_ISC_75_2012; includes events from 1975 to 2012 with mag < 2.5 or no magnitude determined)
- - ANF_06_15.txt 
-
+####Catalog Sources:
+ - NEIC data set (includes historic and event until 2012): data.neic <- data/NEIC_HM_2014.csv
+ - ANSS data set (all magnitudes from 2013-2015): data.anss <- data/ANSS_2013.csv
+ - IRIS stations data: stations.iris <- data/all_stn_metadata_oct15"
+ - ISC small magnitude data (1975-2012 with mag <2.5): data.small_mag <- data/small_mag.txt
+ - ANF data import: data.anf <- data/ANF_06_15.txt
+ - ISC arrivals data: data.arrivals <- data/isc_all_arrivals_no_restriction.txt
 
 ####Magnitude Conversions:
 
@@ -17,8 +30,6 @@ Magnitude conversions where requred on data from ANSS_2013.  This was the method
  ![Table 3.3-1](docs/table3.3_1.png)
 
 *Where the "dashed line" is the function:* `f(lat) = -0.45*lon + 3`
- 
-
  
 ####Installation & Setup
  - Download and install R
