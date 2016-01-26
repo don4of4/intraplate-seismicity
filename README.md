@@ -3,18 +3,18 @@ An exploration of intraplate seismicity in the northeast USA.
 
 ####Table of contents:
 * [Catalog Sources](#catalog-sources)
-* [Magnitude Conversions](#mag-conversions)
-* [Installation & Setup](#install-setup)
+* [Magnitude Conversions](#magnitude-conversions)
+* [Installation & Setup](#installation-setup)
 * [Execution](#execution)
-* [Updating](#update)
-* [Troubleshooting](#troubleshoot)
-* [Directory Structure](#structure)
-* [How to use the software](#use)
-  * [Stations Plot](#tab1)
-  * [Earthquakes Plot](#tab2)
-  * [Density Plot (dbscan)](#tab3)
-  * [3D Plot](#tab4)
-  * [Statistics](#tab5)
+* [Updating](#updating)
+* [Troubleshooting](#troubleshooting)
+* [Directory Structure](#directory-structure)
+* [How to use the software](#how-to-use-the-software)
+  * [Stations Plot](#stations-plot)
+  * [Earthquakes Plot](#earthquakes-plot)
+  * [Density Plot (dbscan)](#density-plot)
+  * [3D Plot](#3d-plot)
+  * [Statistics](#statistics)
 
 ####Catalog Sources:
  - NEIC data set (includes historic and event until 2012): data.neic <- data/NEIC_HM_2014.csv
