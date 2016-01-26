@@ -1,6 +1,9 @@
 ## intraplate-seismicity
 An exploration of intraplate seismicity in the northeast USA.
 
+####Table of contents:
+* [Catalog sources](#catalog-sources)
+
 ####Catalog sources:
  - HM_2014 (flle: 2014_NEIC_declustered.c4; includes historic and event until 2012)
  - ANSS_2013 (file: anss; includes all mag events 2013 until jun 30, 2015)
