@@ -3,18 +3,12 @@ An exploration of intraplate seismicity in the northeast USA.
 
 ####Table of contents:
 * [Catalog Sources](#catalog-sources)
-* [Magnitude Conversions](#magnitude-conversions)
-* [Installation & Setup](#installation-setup)
+* [Installation & Setup](#installation-&-setup)
 * [Execution](#execution)
 * [Updating](#updating)
 * [Troubleshooting](#troubleshooting)
 * [Directory Structure](#directory-structure)
 * [How to use the software](#how-to-use-the-software)
-  * [Stations Plot](#stations-plot)
-  * [Earthquakes Plot](#earthquakes-plot)
-  * [Density Plot (dbscan)](#density-plot)
-  * [3D Plot](#3d-plot)
-  * [Statistics](#statistics)
 
 ####Catalog Sources:
  - NEIC data set (includes historic and event until 2012): data.neic <- data/NEIC_HM_2014.csv
@@ -24,7 +18,7 @@ An exploration of intraplate seismicity in the northeast USA.
  - ANF data import: data.anf <- data/ANF_06_15.txt
  - ISC arrivals data: data.arrivals <- data/isc_all_arrivals_no_restriction.txt
 
-####Magnitude Conversions:
+#####Magnitude Conversions:
 
 Magnitude conversions where requred on data from ANSS_2013.  This was the methodology used.
  ![Table 3.3-1](docs/table3.3_1.png)
