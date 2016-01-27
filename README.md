@@ -103,13 +103,13 @@ The statistics graphs can be found by clicking on the "Statistics" tab, then by 
 To add a catalog, follow the steps below:
   - Open `import.R` (for directions on how to do this, see the "Execution" section of the README).
   - Note the commented text, prefaced by a `#`. This will outline each existing dataset, their file location, and the labeling of the dataset's columns and source. To add a dataset, follow the syntax below:
-  ```R
+```R
 # NAME data set
 data.NAME <- read.table("data/SRC", header = TRUE, sep = ",")
 colnames(data.NAME) <- c("C1","C2","C3","C4*",...)
 data.NAME$src <- 'LABEL'
 data.NAME$declustered <- TRUE|FALSE
-  ```
+```
   - For NAME, choose a short variable name that will easily convey the dataset you are creating.
   - For SRC, you must first acquire a new CSV, TXT, or other file and place it in the `data/` folder. SRC should then be replaced with the name of the file. 
   - For C1, C2, C3, etc., choose names for each column your SRC provides. If, for example, you are implementing station data for another region, you will most likely have "lat","lon","elev","depth", etc. Be sure each label directly corresponds to the data in the given column. For example, if latitidue is listed in the third column, replace "C3" with "lat". 
@@ -124,7 +124,7 @@ To modify a dataset:
   - Find the dataset you wish to modify in the `/data/` directory. 
   - Add the new dataset to this folder. For example, add NEIC_HM_2016.csv into the directory. 
   - Go to `import.R` and modify the line of code `data.neic <- read.table("data/NEIC_HM_2016.csv", header = TRUE, sep = ",")`
-    - For directions on how to navigate to `R import.R`, see the "Execution" section of the README
+    - For directions on how to navigate to `import.R`, see the "Execution" section of the README
     - Note that we are now pointing to NEIC_HM_2016.csv. 
   - Open the new CSV and verify that the column names directly associate with last year's data
     - E.g. `c("emw","lon","lat","depth","y","m","d", "h", "m.1", "s", "mwsig", "nstar","comment")`
