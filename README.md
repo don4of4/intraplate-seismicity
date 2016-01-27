@@ -8,8 +8,8 @@ An exploration of intraplate seismicity in the northeast USA.
 * [Updating](#updating)
 * [Troubleshooting](#troubleshooting)
 * [Directory Structure](#directory-structure)
-* [How to Add a Dataset](how-to-add-a-dataset)
-* [How to Modify a Dataset](how-to-modify-a-dataset)
+* [How to Add a Dataset](#how-to-add-a-dataset)
+* [How to Modify a Dataset](#how-to-modify-a-dataset)
 
 ####Catalog Sources:
  - NEIC data set (includes historic and event until 2012): data.neic <- data/NEIC_HM_2014.csv
