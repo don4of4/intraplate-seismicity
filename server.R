@@ -6,16 +6,14 @@ shinyServer(function(input, output, clientData, session) {
   
   # Create a reactive text
   text <- reactive({
-    plotdata <- subset(dataset, as.numeric(format(datetime, "%Y")) >= input$bins[1] & as.numeric(format(datetime, "%Y")) <= input$bins[2]
-                       & lat <= input$manlatmax & lat >= input$manlatmin
-                       & lon <= input$manlonmax & lon >= input$manlonmin)
+    plotdata <- data.getEvents()
     
-    plotstations <- subset(stations.iris, as.numeric(format(start, "%Y")) >= input$bins[1] & 
-                             as.numeric(format(start, "%Y")) <= input$bins[2] 
-                             & lat <= input$manlatmax & lat >= input$manlatmin
-                             & lon <= input$manlonmax & lon >= input$manlonmin)
-    deduped.plotstations <- unique( plotstations[2:2] )
+    plotstations <- data.getStations()
     
+    stations.count <- function(plotdata){
+      return(n_distinct(plotdata$sta))
+    }
+      
     
     #Determine units and correct quantity to insert into caption
     captionUnit <- function(selectedTab, histo){
@@ -25,13 +23,13 @@ shinyServer(function(input, output, clientData, session) {
     }
     captionQuant <- function(selectedTab, histo){
       quant <- nrow(plotdata)
-      if (selectedTab == "Stations Plot" || ( selectedTab == "Statistics" & histo == 'stations_vs_year')){quant <- nrow(deduped.plotstations)}
+      if (selectedTab == "Stations Plot" || ( selectedTab == "Statistics" & histo == 'stations_vs_year')){quant <- stations.count(plotstations)}
       return(quant)
     } 
     
     
     #Formatted caption with proper quant & unit variable values
-    paste(captionQuant(input$tabs, input$histoParam), captionUnit(input$tabs, input$histoParam), " from ", input$bins[1], '-',input$bins[2] )
+    paste(captionQuant(input$tabs, input$histoParam), captionUnit(input$tabs, input$histoParam), " from ", input$study_year_span[1], '-',input$study_year_span[2] )
   }) 
   
   # Return as text the selected variables
@@ -40,30 +38,54 @@ shinyServer(function(input, output, clientData, session) {
   })
   
   observeEvent(input$increment_end_year, {
-    updateSliderInput(session, "bins", value = c(input$bins[1],input$bins[2]+1))
+    updateSliderInput(session, "study_year_span", value = c(input$study_year_span[1],input$study_year_span[2]+1))
   })
   observeEvent(input$decrement_end_year, {
-    updateSliderInput(session, "bins", value = c(input$bins[1],input$bins[2]-1))
+    updateSliderInput(session, "study_year_span", value = c(input$study_year_span[1],input$study_year_span[2]-1))
   })
   
   observeEvent(input$increment_start_year, {
-    updateSliderInput(session, "bins", value = c(input$bins[1]+1,input$bins[2]))
+    updateSliderInput(session, "study_year_span", value = c(input$study_year_span[1]+1,input$study_year_span[2]))
   })
   observeEvent(input$decrement_start_year, {
-    updateSliderInput(session, "bins", value = c(input$bins[1]-1,input$bins[2]))
-  })
-  observeEvent(input$lower_year_bound, {
-    updateSliderInput(session, "bins", min=input$lower_year_bound)
+    updateSliderInput(session, "study_year_span", value = c(input$study_year_span[1]-1,input$study_year_span[2]))
   })
   
-  #Stations Plot:
+  observeEvent(input$lower_year_bound, {
+    updateSliderInput(session, "study_year_span", min=input$lower_year_bound)
+  })
+  
+  # Data filtering & retrieval
+  data.getEvents <- function(){
+    first_year <- input$study_year_span[1]
+    last_year <- input$study_year_span[2]
+    
+    plotdata <- subset(dataset, as.numeric(format(datetime, "%Y")) >= first_year & as.numeric(format(datetime, "%Y")) <= last_year
+                       & lat <= input$manlatmax & lat >= input$manlatmin
+                       & lon <= input$manlonmax & lon >= input$manlonmin)
+    return(plotdata)
+  }
+  
+  data.getStations <- function(){
+    plotstations <- subset(stations.iris, 
+                           as.numeric(format(start, "%Y")) >= input$study_year_span[1]
+                           & as.numeric(format(start, "%Y")) <= input$study_year_span[2]
+                           & as.numeric(format(end, "%Y")) >= input$study_year_span[2]
+                           & lat <= input$manlatmax & lat >= input$manlatmin
+                           & lon <= input$manlonmax & lon >= input$manlonmin)
+    return(plotstations)
+  }
+  
+  
+  
+  # Stations Plot:
   
   output$plot <- renderPlot({
     
-    plotdata <- subset(dataset, as.numeric(format(datetime, "%Y")) >= input$bins[1] & as.numeric(format(datetime, "%Y")) <= input$bins[2])
-    plotstations <- subset(stations.iris, as.numeric(format(start, "%Y")) >= input$bins[1] & as.numeric(format(start, "%Y")) <= input$bins[2] 
-                           & lat >= input$manlatmin & lat <= input$manlatmax 
-                           & lon <= input$manlonmax & lon >= input$manlonmin)
+    plotdata <- data.getEvents()
+    
+    plotstations <- data.getStations()
+    
     pp <- ggplot() + coord_map() +
       geom_polygon(aes(long,lat, group=group), fill="#a3dca3", colour="#a6a6a6", data=county) +
       geom_polygon(data=states, aes(x=long, y=lat, group = group),colour="royalblue4", fill=NA) +
@@ -76,20 +98,19 @@ shinyServer(function(input, output, clientData, session) {
     print(pp)
     
     ## Download ##
-    datasetInput <- reactive({
-      switch(input$downloadset,
-             "stations" = plotstations,
-             "earthquakes" = plotdata)
-    })
-    
+
     output$table <- renderTable({
       datasetInput()
     })
     
     output$downloadData <- downloadHandler(
-      filename = function() { paste('output.csv', sep='') },
+      filename = function() { paste(input$downloadset, '-output.csv', sep='') },
       content = function(file) {
-        write.csv(datasetInput(), file)
+        write.csv(
+          switch(input$downloadset,
+             "stations" = data.getStations(),
+             "earthquakes" = data.getEvents()
+             ), file)
       }
     )
   })
@@ -98,10 +119,8 @@ shinyServer(function(input, output, clientData, session) {
   
   #Earthquakes Plot:
   output$plot2 <- renderPlot({
-    plotdata <- subset(dataset, as.numeric(format(datetime, "%Y")) >= input$bins[1] & as.numeric(format(datetime, "%Y")) <= input$bins[2] 
-                       & lat <= input$manlatmax & lat >= input$manlatmin
-                       & lon <= input$manlonmax & lon >= input$manlonmin)
     
+    plotdata <- data.getEvents()
     
     pp <- ggplot() + coord_map() +
       geom_polygon(aes(long,lat, group=group), fill="#a3dca3", colour="#a6a6a6", data=county) +
@@ -118,9 +137,8 @@ shinyServer(function(input, output, clientData, session) {
   
   #DBScan Plot:
   output$plot4 <- renderPlot({
-    plotdata <- subset(dataset, as.numeric(format(datetime, "%Y")) >= input$bins[1] & as.numeric(format(datetime, "%Y")) <= input$bins[2] 
-                       & lat <= input$manlatmax & lat >= input$manlatmin
-                       & lon <= input$manlonmax & lon >= input$manlonmin)
+    plotdata <- data.getEvents()
+    
     coordinates=with(plotdata,data.frame(Longitude=lon,Latitude=lat,Depth=depth))
     
     calc_coordinates=with(plotdata,data.frame(Longitude=lon*100,Latitude=lat*100,Depth=depth))
@@ -131,10 +149,8 @@ shinyServer(function(input, output, clientData, session) {
   
   #3D Plot:
   output$plot5 <- renderPlot({
-    plotdata <- subset(dataset, as.numeric(format(datetime, "%Y")) >= input$bins[1] & as.numeric(format(datetime, "%Y")) <= input$bins[2] 
-                       & lat <= input$manlatmax & lat >= input$manlatmin
-                       & lon <= input$manlonmax & lon >= input$manlonmin)
-  
+    plotdata <- data.getEvents()
+    
     calc_coordinates=with(plotdata,data.frame(Longitude=lon,Latitude=lat,Depth=-depth))
     precision=50
     d<<-kde(calc_coordinates,compute.cont=TRUE,gridsize=c(precision,precision,precision))
@@ -147,20 +163,9 @@ shinyServer(function(input, output, clientData, session) {
   output$histoPlot <-  renderPlot({ 
     options( warn = 0 )
     
-    first_year <- input$bins[1]
-    last_year <- input$bins[2]
-      
-    plotdata <- plotdata2 <- subset(dataset, as.numeric(format(datetime, "%Y")) >= first_year & as.numeric(format(datetime, "%Y")) <= last_year
-      & lat <= input$manlatmax & lat >= input$manlatmin
-      & lon <= input$manlonmax & lon >= input$manlonmin)
+    plotdata <- data.getEvents()
     
-    plotstations <- subset(stations.iris, 
-                           as.numeric(format(start, "%Y")) >= input$bins[1]
-                           & as.numeric(format(start, "%Y")) <= input$bins[2]
-                           & as.numeric(format(end, "%Y")) >= input$bins[2]
-                           & lat <= input$manlatmax & lat >= input$manlatmin
-                           & lon <= input$manlonmax & lon >= input$manlonmin)
-  
+    plotstations <- data.getStations()
     
     cum_frequency.mag.graph <- function(plotdata1){ 
       
@@ -260,27 +265,29 @@ shinyServer(function(input, output, clientData, session) {
         need(length(station_data$sta) > 0, "No stations active in this time period.")
       )
       
-      # (6) Iterate the station_data, expanding the date sequence, exploding it, then summarizing it to a freq. table.
-        # Ineffecient way: do(data.frame(sta=.$sta, year=seq(from=.$start_year, to=.$end_year, by=1))) %>% select(sta, year) %>% distinct()
-      # Fast way below.
-      station_summary <- sapply(1:nrow(station_data), function(x){seq(station_data$start_year[x], station_data$end_year[x], by = 1)}) %>%
-        unlist %>% data.frame(year=.) %>% filter(year >= first_year, year <= last_year) 
+      # (6) Iterate the station_data, expanding the date sequence, merging it row-wise on station name (to handle gaps and network changes), exploding it, 
+      #     then summarizing it to a freq. table.
       
-      freq_dist <- station_summary %>% group_by(year) %>% summarise(freq=n())
+      station_summary <- station_data %>% mutate(years = list(seq(start_year, end_year, by = 1))) %>% group_by(sta) %>% select(years)  %>% 
+        do(year = unique(unlist(.$years))) %>% ungroup() %>% unnest(year)
+      
+      
+      freq_dist <- station_summary %>% group_by(year) %>% summarise(freq=n()) %>% as.data.frame()
      
       validate(
         need(length(station_summary$year) > 0, "No stations with your parameters active in this time period.")
       )
       
-      graph <- ggplot(station_summary, aes(x=year)) + geom_histogram(aes(fill=..count..), binwidth=1, colour="black") +
-              coord_cartesian(xlim=c(min(station_summary$year), last_year+1), ylim=c(0,max(freq_dist$freq)+10)) +
-              scale_y_continuous("Number of Stations", breaks=pretty_breaks(n=5)) +
-              scale_x_continuous("Year", breaks=seq(min(station_summary$year),max(station_summary$year),5), 
+      graph <- ggplot(data=freq_dist, aes(x=year, y=freq)) + geom_bar(aes(fill=freq_dist$freq), stat="identity", colour="black") +
+               coord_cartesian(xlim=c(min(station_summary$year), last_year+1), ylim=c(0,max(freq_dist$freq)+10)) +
+               scale_y_continuous("Number of Stations", breaks=pretty_breaks(n=5)) +
+               scale_x_continuous("Year", breaks=seq(min(station_summary$year),max(station_summary$year),5), 
                                  minor_breaks=seq(min(station_summary$year),max(station_summary$year),1)) +
-              scale_fill_gradient("Count", low = "yellow", high = "green")
+               scale_fill_gradient("Count", low = "yellow", high = "green")
       return (graph)
       
     }
+    
     
     events.depth.hist <- function(plotdata){
       return (hist(plotdata$depth, breaks = 15, main = "Num. of Events vs Depth", xlab = "Depth", col = 'darkorange', border='white'))
@@ -295,11 +302,11 @@ shinyServer(function(input, output, clientData, session) {
              magvce = cum_frequency.mag.graph(plotdata),
              cevt = cum_frequency.time.graph(plotdata),
              
-             #magvte = plot(plotdata2$emw, log="y", type='h', lwd=10, lend=2, main = "Num. of Events vs Magnitude", xlab="Magnitude", ylab="Events", col = 'darkblue', border='white'),
+             #magvte = plot(plotdata$emw, log="y", type='h', lwd=10, lend=2, main = "Num. of Events vs Magnitude", xlab="Magnitude", ylab="Events", col = 'darkblue', border='white'),
             
              tevd = events.depth.hist(plotdata),
              magvte = events.mag.hist(plotdata),
-             stations_vs_year = stations.year.hist(plotstations,first_year,last_year)
+             stations_vs_year = stations.year.hist(plotstations, input$study_year_span[1], input$study_year_span[2])
              )
     }
     

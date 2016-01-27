@@ -30,7 +30,7 @@ shinyUI(
     #Panel for slider
     fluidRow(
       wellPanel(
-        sliderInput("bins",
+        sliderInput("study_year_span",
                     "Time:",
                     min = 1800,
                     max = 2016,

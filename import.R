@@ -1,5 +1,5 @@
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load("maps","dplyr","ggplot2","fpc","fossil","WeightedCluster","shinyRGL","scatterplot3d","ks", "shiny")
+pacman::p_load("maps","dplyr","ggplot2","fpc","fossil","WeightedCluster","shinyRGL","scatterplot3d","ks","shiny")
 
 # NEIC data set
 data.neic <- read.table("data/NEIC_HM_2014.csv", header = TRUE, sep = ",")
