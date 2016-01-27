@@ -106,7 +106,7 @@ To add a catalog, follow the steps below:
 ```R
 # NAME data set
 data.NAME <- read.table("data/SRC", header = TRUE, sep = ",")
-colnames(data.NAME) <- c("C1","C2","C3","C4*",...)
+colnames(data.NAME) <- c("C1","C2","C3","C4",...)
 data.NAME$src <- 'LABEL'
 data.NAME$declustered <- TRUE|FALSE
 ```
