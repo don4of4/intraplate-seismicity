@@ -16,7 +16,7 @@ data.anss$declustered <- FALSE
 # IRIS stations data
 stations.iris <- read.table("data/all_stn_metadata_oct15", header = FALSE, sep = "|")
 colnames(stations.iris) <- c("net","sta","loc","chan","lat","lon","elev","depth","azimuth","dip","instrument","scale","scalefreq","scaleunits","samplerate","start","end")
-data.anss$network <- 'IRIS'
+
 
 # ISC small magnitude data
 data.small_mag <- read.table("data/small_mag.txt", header = TRUE, sep = ",")
@@ -27,8 +27,8 @@ data.small_mag$declustered <- FALSE
 # ANF data import
 data.anf <- read.table("data/ANF_06_15.txt", header = FALSE, sep = "")
 colnames(data.anf) <- c('date','time','lon','lat','depth','emw','eventid')
-data.small_mag$src <- 'ANF'
-data.small_mag$declustered <- FALSE
+data.anf$src <- 'ANF'
+data.anf$declustered <- FALSE
 
 # ISC arrivals data
 data.arrivals <- read.table("data/isc_all_arrivals_no_restriction.txt", header = TRUE, sep = ",")
@@ -101,7 +101,7 @@ data.anf <- subset(data.anf, data.anf$emw > 0)
 
 # Filter out based on lat and long  
 # ANF EXCLUDED.  To insert put data.anf below
-dataset <- dplyr::bind_rows(data.neic, data.anss, data.small_mag,data.anf ) # May coerce factors to char, this is okay.
+dataset <- dplyr::bind_rows(data.neic, data.anss, data.small_mag) # May coerce factors to char, this is okay.
 
 
 # States within the region
